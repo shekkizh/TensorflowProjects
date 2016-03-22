@@ -14,7 +14,7 @@ tf.app.flags.DEFINE_string('image2', '',
                            """Path to image 2.""")
 
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
-IMAGE_SIZE = 229
+IMAGE_SIZE = 299
 IMAGE_DEPTH = 3
 
 BOTTLENECK_TENSOR_NAME = 'pool_3/_reshape'
@@ -69,16 +69,15 @@ def find_similarity(sess, image1, image2):
                            {ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image_data2})
 
     float_similarity = tf.cast(tf.sub(feature1,feature2), dtype=tf.float32)
-    print float_similarity
     l2_dist = tf.mul(2.0, tf.nn.l2_loss(float_similarity))
-    print l2_dist
-    return tf.sqrt(l2_dist)/BOTTLENECK_TENSOR_SIZE
+    return tf.div(tf.sqrt(l2_dist),BOTTLENECK_TENSOR_SIZE)
 
 def main(argv=None):
     maybe_download_and_extract()
     create_inception_graph()
     with tf.Session() as sess:
-        print find_similarity(sess, FLAGS.image1, FLAGS.image2)
+        diff = find_similarity(sess, FLAGS.image1, FLAGS.image2)
+        print ("The two images vary by %.5f" % sess.run(diff))
 
 if __name__ == "__main__":
     tf.app.run()
