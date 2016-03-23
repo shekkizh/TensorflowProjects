@@ -4,6 +4,7 @@ import tarfile
 import tensorflow as tf
 from tensorflow.python.platform import gfile
 from six.moves import urllib
+import numpy as np
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('model_dir', 'Models_zoo/imagenet',
@@ -50,6 +51,11 @@ def create_inception_graph():
         graph_def.ParseFromString(f.read())
         _ = tf.import_graph_def(graph_def, name='')
 
+def get_unit_hypersphere_vector(feature):
+    mean_subtacted = np.subtract(feature, np.mean(feature))
+    normalize_vector = np.divide(mean_subtacted, np.sqrt(np.sum(mean_subtacted**2)))
+    return normalize_vector
+
 def find_similarity(sess, image1, image2):
     if not gfile.Exists(image1):
         print ("Cannot find image 1 %s" % image1)
@@ -64,20 +70,30 @@ def find_similarity(sess, image1, image2):
     bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
     feature1 = sess.run(bottleneck_tensor,
                            {ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image_data1})
+    normalized_feature1 = get_unit_hypersphere_vector(feature1)
+    print np.count_nonzero(feature1)
+    print np.max(feature1)
 
     feature2 = sess.run(bottleneck_tensor,
                            {ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image_data2})
+    normalized_feature2 = get_unit_hypersphere_vector(feature2)
+    print np.count_nonzero(feature2)
+    print np.max(feature2)
 
-    float_similarity = tf.cast(tf.sub(feature1,feature2), dtype=tf.float32)
-    l2_dist = tf.mul(2.0, tf.nn.l2_loss(float_similarity))
-    return tf.div(tf.sqrt(l2_dist),BOTTLENECK_TENSOR_SIZE)
+    return np.sum(normalized_feature1 * normalized_feature2)
+
+    # float_similarity = tf.cast(tf.sub(feature1,feature2), dtype=tf.float32)
+    # l2_dist = tf.mul(2.0, tf.nn.l2_loss(float_similarity))
+    # # return tf.div(tf.sqrt(l2_dist),BOTTLENECK_TENSOR_SIZE)
+    # return tf.sqrt(l2_dist)
 
 def main(argv=None):
     maybe_download_and_extract()
     create_inception_graph()
     with tf.Session() as sess:
         diff = find_similarity(sess, FLAGS.image1, FLAGS.image2)
-        print ("The two images vary by %.5f" % sess.run(diff))
+        # print ("The two images vary by %.5f" % sess.run(diff))
+        print ("Similarity score of the two images: %.5f" % diff)
 
 if __name__ == "__main__":
     tf.app.run()
