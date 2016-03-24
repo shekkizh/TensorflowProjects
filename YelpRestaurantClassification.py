@@ -19,20 +19,17 @@ tf.app.flags.DEFINE_string('train_data_dir', "Yelp_Data/train_data", """ Path to
 tf.app.flags.DEFINE_string('test_image_dir', "Yelp_Data/test_photos", """ Path to test image directory""")
 tf.app.flags.DEFINE_string('test_data_dir', "Yelp_Data/test_data", """ Path to other test data""")
 
-tf.app.flags.DEFINE_string('output_graph', 'Yelp_logs/output_graph.pb',
-                           """Where to save the trained graph.""")
-tf.app.flags.DEFINE_string('output_labels', 'Yelp_logs/output_labels.txt',
+tf.app.flags.DEFINE_string('train_dir', 'Yelp_Data/logs/',
                            """Where to save the trained graph's labels.""")
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """How many images to train on at a time.""")
 tf.app.flags.DEFINE_integer('validation_percentage', 10,
                             """What percentage of images to use as a validation set.""")
+tf.app.flags.DEFINE_integer('train_steps', 100000, """No. of training steps """)
 
 # File-system cache locations.
 tf.app.flags.DEFINE_string('model_dir', 'Models_zoo/imagenet',
-                           """Path to classify_image_graph_def.pb, """
-                           """imagenet_synset_to_human_label_map.txt [Not using] """
-                           """imagenet_2012_challenge_label_map_proto.pbtxt [Not using]""")
+                           """Path to classify_image_graph_def.pb, """)
 
 tf.app.flags.DEFINE_string(
     'bottleneck_dir', 'Yelp_Data/train_bottleneck',
@@ -109,17 +106,22 @@ def process_image(image):
     cropped_image = tf.image.resize_images(image, IMAGE_SIZE, IMAGE_SIZE)
     return cropped_image
 
+def generate_batch(image_record):
+    min_queue_examples = int(0.4 * NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN)
+    records = tf.train.batch([image_record], batch_size=FLAGS.batch_size, num_threads=16, capacity=min_queue_examples + 3 * FLAGS.batch_size)
+
 def get_inputs(sess, path, name, photo_biz_map, biz_label_map):
     class ImageRecord(object):
         pass
     result = ImageRecord()
     file_path, filename = sess.run([path, name])
-    result.image = process_image(tf.image.decode_jpeg(gfile.FastGFile(file_path, 'rb').read()))
-    result.bizId = photo_biz_map[os.path.splitext(filename)[0]]
+    result.image = sess.run(process_image(tf.image.decode_jpeg(gfile.FastGFile(file_path, 'rb').read())))
+    result.image_name = os.path.splitext(filename)[0]
+    result.bizId = photo_biz_map[result.image_name]
     result.labels = biz_label_map[result.bizId]
     result.bottleneck_value = None
     tf.image_summary("Input_image", result.image)
-    return result
+    return generate_batch(result)
 
 def ensure_name_has_port(tensor_name):
     if ':' not in tensor_name:
@@ -128,13 +130,36 @@ def ensure_name_has_port(tensor_name):
         name_with_port = tensor_name
     return name_with_port
 
+def save_bottleneck_to_file(image_record, bottleneck_values):
+    bottleneck_path = os.path.join(FLAGS.bottleneck_dir, image_record.image_name, '.txt')
+    if not os.path.exists(bottleneck_path):
+        bottleneck_string = ','.join(str(x) for x in bottleneck_values)
+        with open(bottleneck_path, 'w') as bottleneck_file:
+            bottleneck_file.write(bottleneck_string)
 
-def inference(sess, image):
-    bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
+    with open(bottleneck_path, 'r') as bottleneck_file:
+        bottleneck_string = bottleneck_file.read()
+        image_record.bottleneck_value = [float(x) for x in bottleneck_string.split(',')]
+
+    return image_record
+
+def create_bottleneck_value(sess, image_record):
+     bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
+     bottleneck_values = np.squeeze(sess.run(bottleneck_tensor, feed_dict={ensure_name_has_port(JPEG_DATA_TENSOR_NAME):image_record.image}))
+     image_record = save_bottleneck_to_file(image_record, bottleneck_values)
+     return image_record
+
+
+def inference(sess, image_record):
+
     layer_weights = tf.Variable(tf.truncated_normal([BOTTLENECK_TENSOR_SIZE, NUM_CLASSES], stddev=0.001),name='final_weights')
+    tf.histogram_summary(layer_weights.name, layer_weights)
     layer_biases = tf.Variable(tf.zeros([NUM_CLASSES]), name='final_biases')
-    logits = tf.matmul(bottleneck_tensor, layer_weights, name='final_matmul') + layer_biases
-    return sess.run(logits, {ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image})
+    tf.histogram_summary(layer_biases.name, layer_biases)
+    if not image_record.bottleneck_value:
+        create_bottleneck_value(sess, image_record)
+    logits = tf.nn.bias_add(tf.matmul(image_record.bottleneck_value, layer_weights, name='final_matmul'), layer_biases)
+    return sess.run(logits, feed_dict={ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image_record.image})
 
 def losses(logits_linear, labels):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits_linear, labels, name="cross_entropy")
@@ -174,7 +199,7 @@ def main(argv=None):
 
     image_record = get_inputs(sess, path_op, name_op, photo_biz_dict, biz_label_dict)
 
-    logits_linear = inference(sess, image_record.image)
+    logits_linear = inference(sess, image_record)
     print "Inference"
 
     loss = losses(logits_linear, image_record.labels)
@@ -193,15 +218,20 @@ def main(argv=None):
 
     summary_writer = tf.train.SummaryWriter(FLAGS.train_dir, graph_def=sess.graph_def)
 
-    _, cross_entropy = sess.run([train_op, loss])
+    for step in xrange(FLAGS.train_steps):
+        _, cross_entropy = sess.run([train_op, loss])
 
-    print cross_entropy
+        if step % 10 == 0:
+            str_log = '%s step:%d, entropy: %0.2f' % datetime.now(), step, cross_entropy
+            print str_log
 
+        if step% 100 == 0:
+            summary_str = sess.run(summary_op)
+            summary_writer.add_summary(summary_str, step)
 
-
-
-
-
+        if step%1000 == 0:
+            checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
+            saver.save(sess, checkpoint_path, global_step=step)
 
 
 if __name__ == "__main__":
