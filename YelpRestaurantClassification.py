@@ -19,7 +19,7 @@ tf.app.flags.DEFINE_string('train_data_dir', "Yelp_Data/train_data", """ Path to
 tf.app.flags.DEFINE_string('test_image_dir', "Yelp_Data/test_photos", """ Path to test image directory""")
 tf.app.flags.DEFINE_string('test_data_dir', "Yelp_Data/test_data", """ Path to other test data""")
 
-tf.app.flags.DEFINE_string('train_dir', 'Yelp_Data/logs/',
+tf.app.flags.DEFINE_string('train_dir', 'Yelp_logs/',
                            """Where to save the trained graph's labels.""")
 tf.app.flags.DEFINE_integer('batch_size', 128,
                             """How many images to train on at a time.""")
@@ -34,9 +34,7 @@ tf.app.flags.DEFINE_string('model_dir', 'Models_zoo/imagenet',
 tf.app.flags.DEFINE_string(
     'bottleneck_dir', 'Yelp_Data/train_bottleneck',
     """Path to cache bottleneck layer values as files.""")
-tf.app.flags.DEFINE_string('final_tensor_name', 'final_result',
-                           """The name of the output classification layer in"""
-                           """ the retrained graph.""")
+
 tf.app.flags.DEFINE_string('mode', "train", """Mode: train / test""")
 
 DATA_URL = 'http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz'
@@ -108,7 +106,8 @@ def process_image(image):
 
 def generate_batch(image_record):
     min_queue_examples = int(0.4 * NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN)
-    records = tf.train.batch([image_record], batch_size=FLAGS.batch_size, num_threads=16, capacity=min_queue_examples + 3 * FLAGS.batch_size)
+    image, name = tf.train.batch([image_record.image, image_record.image_name], batch_size=FLAGS.batch_size, num_threads=16, capacity=min_queue_examples + 3 * FLAGS.batch_size)
+    return image, name
 
 def get_inputs(sess, path, name, photo_biz_map, biz_label_map):
     class ImageRecord(object):
@@ -130,36 +129,32 @@ def ensure_name_has_port(tensor_name):
         name_with_port = tensor_name
     return name_with_port
 
-def save_bottleneck_to_file(image_record, bottleneck_values):
-    bottleneck_path = os.path.join(FLAGS.bottleneck_dir, image_record.image_name, '.txt')
+def get_or_create_bottleneck_value(sess, image, name):
+    bottleneck_path = os.path.join(FLAGS.bottleneck_dir, sess.run(name), '.txt')
+    print bottleneck_path
+
     if not os.path.exists(bottleneck_path):
+        bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
+        bottleneck_values = np.squeeze(sess.run(bottleneck_tensor, feed_dict={ensure_name_has_port(JPEG_DATA_TENSOR_NAME):image}))
         bottleneck_string = ','.join(str(x) for x in bottleneck_values)
         with open(bottleneck_path, 'w') as bottleneck_file:
             bottleneck_file.write(bottleneck_string)
 
     with open(bottleneck_path, 'r') as bottleneck_file:
         bottleneck_string = bottleneck_file.read()
-        image_record.bottleneck_value = [float(x) for x in bottleneck_string.split(',')]
+        bottleneck_value = [float(x) for x in bottleneck_string.split(',')]
 
-    return image_record
-
-def create_bottleneck_value(sess, image_record):
-     bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
-     bottleneck_values = np.squeeze(sess.run(bottleneck_tensor, feed_dict={ensure_name_has_port(JPEG_DATA_TENSOR_NAME):image_record.image}))
-     image_record = save_bottleneck_to_file(image_record, bottleneck_values)
-     return image_record
+    return bottleneck_value
 
 
-def inference(sess, image_record):
-
+def inference(sess, image, name):
     layer_weights = tf.Variable(tf.truncated_normal([BOTTLENECK_TENSOR_SIZE, NUM_CLASSES], stddev=0.001),name='final_weights')
     tf.histogram_summary(layer_weights.name, layer_weights)
     layer_biases = tf.Variable(tf.zeros([NUM_CLASSES]), name='final_biases')
     tf.histogram_summary(layer_biases.name, layer_biases)
-    if not image_record.bottleneck_value:
-        create_bottleneck_value(sess, image_record)
-    logits = tf.nn.bias_add(tf.matmul(image_record.bottleneck_value, layer_weights, name='final_matmul'), layer_biases)
-    return sess.run(logits, feed_dict={ensure_name_has_port(JPEG_DATA_TENSOR_NAME): image_record.image})
+    bottleneck_value = get_or_create_bottleneck_value(sess, image, name)
+    logits = tf.nn.bias_add(tf.matmul(bottleneck_value, layer_weights, name='final_matmul'), layer_biases)
+    return sess.run(logits)
 
 def losses(logits_linear, labels):
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits_linear, labels, name="cross_entropy")
@@ -197,12 +192,14 @@ def main(argv=None):
 
     global_step = tf.Variable(0, trainable=False)
 
-    image_record = get_inputs(sess, path_op, name_op, photo_biz_dict, biz_label_dict)
+    image, name = get_inputs(sess, path_op, name_op, photo_biz_dict, biz_label_dict)
 
-    logits_linear = inference(sess, image_record)
+    logits_linear = inference(sess, image, name)
     print "Inference"
 
-    loss = losses(logits_linear, image_record.labels)
+    label = biz_label_dict[photo_biz_dict[sess.run(name)]]
+
+    loss = losses(logits_linear, label)
     print "loss"
 
     train_op = train(loss, global_step)
