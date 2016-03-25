@@ -48,7 +48,7 @@ BOTTLENECK_TENSOR_NAME = 'pool_3/_reshape'
 BOTTLENECK_TENSOR_SIZE = 2048
 JPEG_DATA_TENSOR_NAME = 'DecodeJpeg/contents'
 
-NUM_CLASSES = 10
+NUM_CLASSES = 9
 
 
 def maybe_download_and_extract():
@@ -170,12 +170,15 @@ def get_or_create_bottleneck_value(sess, image_record):
 def create_bottleneck_cache(sess, records_list):
     bottlenecks_created = 0
     for image_record in records_list:
-        get_or_create_bottleneck_value(sess, image_record)
-        bottlenecks_created += 1
+        try:
+            get_or_create_bottleneck_value(sess, image_record)
+            bottlenecks_created += 1
 
-        if bottlenecks_created % 100 == 0:
-            print "%s bottlenecks created: %d" % (datetime.now(), bottlenecks_created)
-
+            if bottlenecks_created % 5000 == 0:
+                print "%s bottlenecks created: %d" % (datetime.now(), bottlenecks_created)
+        except:
+            print "Unable to use image: %s" % image_record.image_name
+            records_list.remove(image_record)
 
 def get_random_bottlenecks(sess, records_list, batch_size, photo_biz_dict, biz_label_dict):
     bottlenecks = []
@@ -188,7 +191,7 @@ def get_random_bottlenecks(sess, records_list, batch_size, photo_biz_dict, biz_l
         bottlenecks.append(bottleneck_value)
         labels.append(label)
 
-    return bottlenecks, labels
+    return bottlenecks, np.squeeze(labels)
 
 
 def inference(graph):
@@ -200,7 +203,7 @@ def inference(graph):
     layer_biases = tf.Variable(tf.zeros([NUM_CLASSES]), name='final_layer_biases')
     tf.histogram_summary(layer_biases.name, layer_biases)
 
-    logits = tf.nn.bias_add(tf.matmul(bottleneck_tensor, layer_weights, name=ensure_name_has_port('linear_pred')), layer_biases)
+    logits = tf.nn.bias_add(tf.matmul(bottleneck_tensor, layer_weights, name='linear_pred'), layer_biases)
     return logits
 
 
@@ -210,17 +213,14 @@ def losses(logits_linear, labels):
     tf.scalar_summary("Loss", cross_entropy_mean)
     return cross_entropy_mean
 
-
 def train(loss, global_step):
     return tf.train.AdamOptimizer(1e-4).minimize(loss, global_step=global_step)
 
-def evaluation(graph):
-    ground_truth = graph.get_tensor_by_name(ensure_name_has_port("ground_truth_tensor"))
-    linear_pred_tensor = graph.get_tensor_by_name(ensure_name_has_port('linear_pred'))
-    pred = tf.nn.softmax(linear_pred_tensor)
-    label = tf.zeros((1, NUM_CLASSES), dtype=tf.float32)
-    label[pred > 0.9] = 1
-    eval_step = tf.reduce_mean(tf.sub(label, ground_truth))
+def evaluation(logits_linear, ground_truth):
+    entropy = tf.nn.softmax_cross_entropy_with_logits(logits_linear, ground_truth, name="eval_entropy")
+    eval_step = tf.reduce_mean(entropy)
+    tf.scalar_summary("Eval_entropy", eval_step)
+    return eval_step
 
 def main(argv=None):
     maybe_download_and_extract()
@@ -231,22 +231,22 @@ def main(argv=None):
 
     train_image_records, eval_image_records = get_image_records()
     with tf.Session() as sess:
-        print "Creating bottleneck cache for training images..."
-        create_bottleneck_cache(sess, train_image_records)
-        print "Creating bottleneck cache for eval images..."
-        create_bottleneck_cache(sess, eval_image_records)
+        # print "Creating bottleneck cache for training images..."
+        # create_bottleneck_cache(sess, train_image_records)
+        # print "Creating bottleneck cache for eval images..."
+        # create_bottleneck_cache(sess, eval_image_records)
 
         logits_linear = inference(sess.graph)
         print "Inference"
 
-        label_placeholder = tf.placeholder(tf.float32, (None, NUM_CLASSES), name=ensure_name_has_port("ground_truth_tensor"))
+        label_placeholder = tf.placeholder(tf.float32, (None, NUM_CLASSES), name="ground_truth_tensor")
         loss = losses(logits_linear, label_placeholder)
-        print "loss"
+        print "Loss"
 
         train_op = train(loss, global_step)
         print "Train"
 
-        eval_op = evaluation(sess.graph)
+        eval_op = evaluation(logits_linear, label_placeholder)
 
         bottleneck_tensor = sess.graph.get_tensor_by_name(ensure_name_has_port(BOTTLENECK_TENSOR_NAME))
 
@@ -263,23 +263,20 @@ def main(argv=None):
         for step in xrange(FLAGS.train_steps):
             train_bottlenecks, train_labels = get_random_bottlenecks(sess, train_image_records, FLAGS.batch_size,
                                                                  photo_biz_dict, biz_label_dict)
-
-
-            _, cross_entropy = sess.run([train_op, loss], feed_dict={bottleneck_tensor:train_bottlenecks,
-                                                                     label_placeholder:train_labels})
+            train_feed = {bottleneck_tensor:train_bottlenecks, label_placeholder:train_labels}
+            sess.run(train_op, loss, feed_dict=train_feed)
             if step % 10 == 0:
-                str_log = '%s step:%d, train cross entropy: %0.2f' % (datetime.now(), step, cross_entropy)
-                print str_log
-
                 eval_bottlenecks, eval_labels = get_random_bottlenecks(sess, eval_image_records,FLAGS.batch_size,
                                                                        photo_biz_dict, biz_label_dict)
-                _, eval_accuracy = sess.run(eval_op, feed_dict={bottleneck_tensor:eval_bottlenecks,
-                                                                label_placeholder:eval_labels})
-                print "Eval Accuracy %0.2f" % eval_accuracy
+
+                eval_entropy = sess.run(eval_op, feed_dict={bottleneck_tensor:eval_bottlenecks, label_placeholder:eval_labels})
+                print "Eval Entropy %0.2f" % eval_entropy
 
             if step % 100 == 0:
-                summary_str = sess.run(summary_op)
+                cross_entropy, summary_str = sess.run([loss, summary_op], feed_dict=train_feed)
                 summary_writer.add_summary(summary_str, step)
+                str_log = '----> %s step:%d, Train Cross Entropy: %0.2f' % (datetime.now(), step, cross_entropy)
+                print str_log
 
             if step % 1000 == 0:
                 checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
