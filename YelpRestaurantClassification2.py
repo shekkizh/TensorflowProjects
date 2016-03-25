@@ -180,11 +180,12 @@ def create_bottleneck_cache(sess, records_list):
             print "Unable to use image: %s" % image_record.image_name
             records_list.remove(image_record)
 
+
 def get_random_bottlenecks(sess, records_list, batch_size, photo_biz_dict, biz_label_dict):
     bottlenecks = []
     labels = []
     for i in range(batch_size):
-        record_index = random.randrange(65536) % len(records_list)
+        record_index = random.randrange(len(records_list))
         image_record = records_list[record_index]
         bottleneck_value = get_or_create_bottleneck_value(sess, image_record)
         label = biz_label_dict[photo_biz_dict[image_record.image_name]]
@@ -213,14 +214,17 @@ def losses(logits_linear, labels):
     tf.scalar_summary("Loss", cross_entropy_mean)
     return cross_entropy_mean
 
+
 def train(loss, global_step):
-    return tf.train.AdamOptimizer(1e-4).minimize(loss, global_step=global_step)
+    return tf.train.AdamOptimizer(1e-6).minimize(loss, global_step=global_step)
+
 
 def evaluation(logits_linear, ground_truth):
     entropy = tf.nn.softmax_cross_entropy_with_logits(logits_linear, ground_truth, name="eval_entropy")
     eval_step = tf.reduce_mean(entropy)
     tf.scalar_summary("Eval_entropy", eval_step)
     return eval_step
+
 
 def main(argv=None):
     maybe_download_and_extract()
@@ -231,10 +235,10 @@ def main(argv=None):
 
     train_image_records, eval_image_records = get_image_records()
     with tf.Session() as sess:
-        # print "Creating bottleneck cache for training images..."
-        # create_bottleneck_cache(sess, train_image_records)
-        # print "Creating bottleneck cache for eval images..."
-        # create_bottleneck_cache(sess, eval_image_records)
+        print "Creating bottleneck cache for training images..."
+        create_bottleneck_cache(sess, train_image_records)
+        print "Creating bottleneck cache for eval images..."
+        create_bottleneck_cache(sess, eval_image_records)
 
         logits_linear = inference(sess.graph)
         print "Inference"
@@ -262,23 +266,23 @@ def main(argv=None):
 
         for step in xrange(FLAGS.train_steps):
             train_bottlenecks, train_labels = get_random_bottlenecks(sess, train_image_records, FLAGS.batch_size,
-                                                                 photo_biz_dict, biz_label_dict)
-            train_feed = {bottleneck_tensor:train_bottlenecks, label_placeholder:train_labels}
-            sess.run(train_op, loss, feed_dict=train_feed)
-            if step % 10 == 0:
-                eval_bottlenecks, eval_labels = get_random_bottlenecks(sess, eval_image_records,FLAGS.batch_size,
-                                                                       photo_biz_dict, biz_label_dict)
-
-                eval_entropy = sess.run(eval_op, feed_dict={bottleneck_tensor:eval_bottlenecks, label_placeholder:eval_labels})
-                print "Eval Entropy %0.2f" % eval_entropy
+                                                                     photo_biz_dict, biz_label_dict)
+            train_feed = {bottleneck_tensor: train_bottlenecks, label_placeholder: train_labels}
+            sess.run(train_op, feed_dict=train_feed)
 
             if step % 100 == 0:
                 cross_entropy, summary_str = sess.run([loss, summary_op], feed_dict=train_feed)
                 summary_writer.add_summary(summary_str, step)
-                str_log = '----> %s step:%d, Train Cross Entropy: %0.2f' % (datetime.now(), step, cross_entropy)
+                str_log = '%s step:%d, Train Cross Entropy: %0.2f' % (datetime.now(), step, cross_entropy)
                 print str_log
 
             if step % 1000 == 0:
+                eval_bottlenecks, eval_labels = get_random_bottlenecks(sess, eval_image_records, FLAGS.batch_size,
+                                                                       photo_biz_dict, biz_label_dict)
+                eval_entropy = sess.run(eval_op,
+                                        feed_dict={bottleneck_tensor: eval_bottlenecks, label_placeholder: eval_labels})
+                print "Eval Entropy %0.2f" % eval_entropy
+
                 checkpoint_path = os.path.join(FLAGS.train_dir, 'model.ckpt')
                 saver.save(sess, checkpoint_path, global_step=step)
 
