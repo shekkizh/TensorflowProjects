@@ -24,7 +24,7 @@ tf.app.flags.DEFINE_string('test_data_dir', "Yelp_Data/test_data", """ Path to o
 
 tf.app.flags.DEFINE_string('train_dir', 'Yelp_logs/',
                            """Where to save the trained graph's labels.""")
-tf.app.flags.DEFINE_integer('batch_size', 128,
+tf.app.flags.DEFINE_integer('batch_size', 512,
                             """How many images to train on at a time.""")
 tf.app.flags.DEFINE_integer('validation_percentage', 10,
                             """What percentage of images to use as a validation set.""")
@@ -113,15 +113,16 @@ def get_image_records():
     eval_records = []
     for _, _, files in os.walk(FLAGS.train_image_dir):
         filenames = [x for x in files]
-
+        
+    filenames_length = len(filenames)
+    eval_percentage_threshold = FLAGS.validation_percentage * filenames_length
     for file in filenames:
         # ImageRecord contains filename and imagename
         record = ImageRecord()
         record.filename = file
         record.image_name = os.path.splitext(file)[0]
-        hash_name_hashed = hashlib.sha1(record.image_name.encode('utf-8')).hexdigest()
-        percentage_hash = (int(hash_name_hashed, 16) % (65536)) * (100 / 65535.0)
-        if percentage_hash < FLAGS.validation_percentage:
+        rand_val = random.randrange(filenames_length)
+        if rand_val < eval_percentage_threshold:
             eval_records.append(record)
         else:
             train_records.append(record)
@@ -216,7 +217,7 @@ def losses(logits_linear, labels):
 
 
 def train(loss, global_step):
-    return tf.train.AdamOptimizer(1e-6).minimize(loss, global_step=global_step)
+    return tf.train.AdamOptimizer(1e-4).minimize(loss, global_step=global_step)
 
 
 def evaluation(logits_linear, ground_truth):
@@ -229,12 +230,12 @@ def evaluation(logits_linear, ground_truth):
 def main(argv=None):
     maybe_download_and_extract()
     photo_biz_dict, biz_label_dict = read_csv_files()
-    create_inception_graph()
-
-    global_step = tf.Variable(0, trainable=False)
-
+    
     train_image_records, eval_image_records = get_image_records()
     with tf.Session() as sess:
+        create_inception_graph()
+
+        global_step = tf.Variable(0, trainable=False)
         print "Creating bottleneck cache for training images..."
         create_bottleneck_cache(sess, train_image_records)
         print "Creating bottleneck cache for eval images..."
