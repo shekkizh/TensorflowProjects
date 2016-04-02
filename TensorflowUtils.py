@@ -25,14 +25,14 @@ def maybe_download_and_extract(dir_path, url_name):
         tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
 
-def weight_variable(shape, stddev=0.1):
+def weight_variable(shape, stddev=0.1, name=""):
     initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
+    return tf.Variable(initial, name=name)
 
 
-def bias_variable(shape):
+def bias_variable(shape, name=""):
     initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
+    return tf.Variable(initial, name=name)
 
 
 def get_tensor_size(tensor):
