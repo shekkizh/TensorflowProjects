@@ -1,7 +1,6 @@
-import random
-
 __author__ = 'Charlie'
 
+import random
 import os, sys
 import tensorflow as tf
 from datetime import datetime

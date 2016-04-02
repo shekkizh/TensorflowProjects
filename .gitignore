@@ -1,3 +1,4 @@
 MNIST_data
 Models_zoo/
 *.pyc
+ImageAlignment.py

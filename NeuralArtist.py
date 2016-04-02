@@ -13,8 +13,7 @@ args = vars(ap.parse_args())
 LOG_DIR = "logs/NeuralArtist_logs/"
 
 NEURONS_PER_LAYER = 20
-LEARNING_RATE = 1e-3
-BATCH_SIZE = 1024
+LEARNING_RATE = 1e-2
 
 MAX_ITERATIONS = 100000
 
@@ -76,12 +75,24 @@ def inference(inputs):
         tf.histogram_summary("W6", W6)
         tf.histogram_summary("b6", b6)
         h6 = tf.nn.relu(tf.matmul(h5, W6) + b6)
+    with tf.name_scope("hidden7"):
+        W7 = utils.weight_variable([NEURONS_PER_LAYER, NEURONS_PER_LAYER], name="weights_7")
+        b7 = utils.bias_variable([NEURONS_PER_LAYER], name="bias_7")
+        tf.histogram_summary("W7", W6)
+        tf.histogram_summary("b7", b6)
+        h7 = tf.nn.relu(tf.matmul(h6, W7) + b7)
+    with tf.name_scope("hidden8"):
+        W8 = utils.weight_variable([NEURONS_PER_LAYER, NEURONS_PER_LAYER], name="weights_8")
+        b8 = utils.bias_variable([NEURONS_PER_LAYER], name="bias_8")
+        tf.histogram_summary("W8", W6)
+        tf.histogram_summary("b8", b6)
+        h8 = tf.nn.relu(tf.matmul(h7, W8) + b8)
     with tf.name_scope("output"):
-        W7 = utils.weight_variable([NEURONS_PER_LAYER, channels], name="weights_7")
-        b7 = utils.bias_variable([channels], name="bias_7")
-        tf.histogram_summary("W7", W7)
-        tf.histogram_summary("b7", b7)
-        pred = tf.matmul(h6, W7) + b7
+        W9 = utils.weight_variable([NEURONS_PER_LAYER, channels], name="weights_9")
+        b9 = utils.bias_variable([channels], name="bias_9")
+        tf.histogram_summary("W9", W9)
+        tf.histogram_summary("b9", b9)
+        pred = tf.matmul(h8, W9) + b9
 
     return pred
 
@@ -142,12 +153,14 @@ def main(argv=None):
 
 if __name__ == "__main__":
     image = misc.imread(args["image"])
+    image = misc.imresize(image, (225,225))
     # image = np.array([[[0, 0, 0], [1, 1, 1]], [[2, 2, 2], [3, 3, 3]]])
     height, width, channels = image.shape
     image_size = height * width
     # mean_pixel = np.mean(image, axis=(0, 1))
     # processed_image = utils.process_image(image, mean_pixel)
     image_reshape = np.reshape(image, (-1, channels)).astype(np.float32)
+    BATCH_SIZE = image_size/5
     print image_reshape.shape
 
     input_list = []
