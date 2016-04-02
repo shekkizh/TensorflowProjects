@@ -141,21 +141,24 @@ def main(argv=None):
         best = None
         sess.run(tf.initialize_all_variables())
 
-        for i in range(MAX_ITERATIONS):
+        for i in range(1, MAX_ITERATIONS):
             train_step.run()
 
-            if i % 100 == 0 or i == MAX_ITERATIONS - 1:
+            if i % 10 == 0 or i == MAX_ITERATIONS - 1:
                 this_loss = loss.eval()
+                print('Step %d' % (i)),
+                print('    total loss: %g' % this_loss)
+
                 if this_loss < best_loss:
                     best_loss = this_loss
                     best = dummy_image.eval()
+                    output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel)
+                    scipy.misc.imsave("output_check.jpg", output)
 
-            if i % 1000 == 0 or i == MAX_ITERATIONS - 1:
-                print('Step %d' % (i + 1)),
+            if i % 100 == 0 or i == MAX_ITERATIONS - 1:
                 print('  content loss: %g' % content_loss.eval()),
                 print('    style loss: %g' % style_loss.eval()),
-                print('       tv loss: %g' % tv_loss.eval()),
-                print('    total loss: %g' % loss.eval())
+                print('       tv loss: %g' % tv_loss.eval())
 
     output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel)
     scipy.misc.imsave("output.jpg", output)
