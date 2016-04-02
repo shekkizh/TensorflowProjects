@@ -10,9 +10,11 @@ ap = argparse.ArgumentParser("Train a network to guess RGB of image")
 ap.add_argument("-i", "--image", required=True, help="Path to image")
 args = vars(ap.parse_args())
 
+LOG_DIR = "logs/NeuralArtist_logs/"
+
 NEURONS_PER_LAYER = 20
-LEARNING_RATE = 1e-4
-BATCH_SIZE = 128
+LEARNING_RATE = 1e-3
+BATCH_SIZE = 1024
 
 MAX_ITERATIONS = 100000
 
@@ -85,7 +87,7 @@ def inference(inputs):
 
 
 def loss(pred, actual):
-    loss_val = 2 * tf.nn.l2_loss(tf.sub(pred, actual)) / image_size
+    loss_val =  tf.sqrt(2 *tf.nn.l2_loss(tf.sub(pred, actual))) / image_size
     tf.scalar_summary("loss", loss_val)
     return loss_val
 
@@ -104,9 +106,13 @@ def main(argv=None):
         loss_val = loss(pred_val, preds)
         train_op = train(loss_val)
         summary_op = tf.merge_all_summaries()
-        summary_writer = tf.train.SummaryWriter("logs/NeuralArtist_logs/")
+        summary_writer = tf.train.SummaryWriter(LOG_DIR)
         with tf.Session() as sess:
             sess.run(tf.initialize_all_variables())
+            saver = tf.train.Saver()
+            ckpt = tf.train.get_checkpoint_state(LOG_DIR)
+            if ckpt and ckpt.model_checkpoint_path:
+                saver.restore(sess, ckpt.model_checkpoint_path)
 
             for step in xrange(MAX_ITERATIONS):
                 batch_input, batch_pred = get_next_batch(BATCH_SIZE)
@@ -124,6 +130,9 @@ def main(argv=None):
                                                 image.shape)  # utils.unprocess_image(np.reshape(pred_image, image.shape), mean_pixel)
                         misc.imsave("neural_artist_check.jpg", pred_image)
                         best_loss = this_loss
+
+                if step%1000 == 0:
+                    saver.save(sess, LOG_DIR + "model.ckpt", global_step=step)
 
             best_image = sess.run(pred_val, feed_dict={inputs: input_value})
             best_image = np.reshape(best_image,
