@@ -1,5 +1,5 @@
 __author__ = 'Charlie'
-# Attempt to learn alignment info given image and its reference
+# Attempt at Mahendran and Vedaldi's Understanding Deep Image Representations by Inverting them
 
 import tensorflow as tf
 import numpy as np
@@ -10,15 +10,15 @@ import TensorflowUtils as utils
 import os, sys
 
 FLAGS = tf.flags.FLAGS
-tf.flags.DEFINE_string("image_path", "", """Path to image to be dreamed""")
+tf.flags.DEFINE_string("image_path", "", """Path to image to be inverted""")
 tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the AlexNet model mat file""")
-tf.flags.DEFINE_string("log_dir", "logs/Deepdream_logs/", """Path to save logs and checkpoint if needed""")
+tf.flags.DEFINE_string("log_dir", "logs/ImageInversion_logs/", """Path to save logs and checkpoint if needed""")
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
 LEARNING_RATE = 1e0
 MAX_ITERATIONS = 10000
-DREAM_LAYER = 'conv5_1'
+INVERT_LAYER = 'conv5_1'
 
 
 def get_model_data():
@@ -79,24 +79,24 @@ def vgg_net(weights, image):
 def main(argv=None):
     utils.maybe_download_and_extract(FLAGS.model_dir, DATA_URL)
     model_data = get_model_data()
-    dream_image = get_image(FLAGS.image_path)
-    print dream_image.shape
+    invert_image = get_image(FLAGS.image_path)
+    print invert_image.shape
 
     mean = model_data['normalization'][0][0][0]
     mean_pixel = np.mean(mean, axis=(0, 1))
 
-    processed_image = utils.process_image(dream_image, mean_pixel)
+    processed_image = utils.process_image(invert_image, mean_pixel)
     weights = np.squeeze(model_data['layers'])
 
-    dream_net = vgg_net(weights, processed_image)
+    invert_net = vgg_net(weights, processed_image)
 
-    dummy_image = utils.weight_variable(dream_image.shape, stddev=np.std(dream_image) * 0.1)
+    dummy_image = utils.weight_variable(invert_image.shape, stddev=np.std(invert_image) * 0.1)
     tf.histogram_summary("Image Output", dummy_image)
     image_net = vgg_net(weights, dummy_image)
 
     with tf.Session() as sess:
-        dream_layer_features = dream_net[DREAM_LAYER].eval()
-        loss = 2 * tf.nn.l2_loss(image_net[DREAM_LAYER] - dream_layer_features) / dream_layer_features.size
+        invert_layer_features = invert_net[INVERT_LAYER].eval()
+        loss = 2 * tf.nn.l2_loss(image_net[INVERT_LAYER] - invert_layer_features) / invert_layer_features.size
         tf.scalar_summary("Loss", loss)
 
         summary_op = tf.merge_all_summaries()
@@ -118,10 +118,10 @@ def main(argv=None):
                 if this_loss < best_loss:
                     best_loss = this_loss
                     best = dummy_image.eval()
-                    output = utils.unprocess_image(best.reshape(dream_image.shape[1:]), mean_pixel)
-                    scipy.misc.imsave("dream_check.jpg", output)
+                    output = utils.unprocess_image(best.reshape(invert_image.shape[1:]), mean_pixel)
+                    scipy.misc.imsave("invert_check.jpg", output)
 
-    output = utils.unprocess_image(best.reshape(dream_image.shape[1:]), mean_pixel)
+    output = utils.unprocess_image(best.reshape(invert_image.shape[1:]), mean_pixel)
     scipy.misc.imsave("output.jpg", output)
 
 
