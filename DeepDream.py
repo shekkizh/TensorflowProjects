@@ -11,21 +11,21 @@ import os, sys
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("image_path", "", """Path to image to be dreamed""")
-tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the AlexNet model mat file""")
+tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGGNet model mat file""")
 tf.flags.DEFINE_string("log_dir", "logs/Deepdream_logs/", """Path to save logs and checkpoint if needed""")
 
-DATA_URL = 'http://www.vlfeat.org/matconvnet/models/imagenet-caffe-alex.mat'
+DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
 LEARNING_RATE = 1e0
 MAX_ITERATIONS = 10000
-DREAM_LAYER = "conv5"
+DREAM_LAYER = "relu5_4"
 
 
 def get_model_data():
     filename = DATA_URL.split("/")[-1]
     filepath = os.path.join(FLAGS.model_dir, filename)
     if not os.path.exists(filepath):
-        raise IOError("AlexNet Model not found!")
+        raise IOError("VGGNet Model not found!")
     data = scipy.io.loadmat(filepath)
     return data
 
@@ -36,13 +36,20 @@ def get_image(image_dir):
     return image
 
 
-def alex_net(weights, image):
+def vgg_net(weights, image):
     layers = (
-        'conv1', 'relu1', 'norm1', 'pool1',
-        'conv2', 'relu2', 'norm2', 'pool2',
-        'conv3', 'relu3',
-        'conv4', 'relu4',
-        'conv5', 'relu5', 'pool5',
+        'conv1_1', 'relu1_1', 'conv1_2', 'relu1_2', 'pool1',
+
+        'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2',
+
+        'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
+        'relu3_3', 'conv3_4', 'relu3_4', 'pool3',
+
+        'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
+        'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
+
+        'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3',
+        'relu5_3', 'conv5_4', 'relu5_4'
     )
 
     net = {}
@@ -81,15 +88,15 @@ def main(argv=None):
     processed_image = utils.process_image(dream_image, mean_pixel)
     weights = np.squeeze(model_data['layers'])
 
-    dream_net = alex_net(weights, processed_image)
-
-    dummy_image = utils.weight_variable(dream_image.shape, stddev=np.std(dream_image) * 0.1)
-    tf.histogram_summary("Image Output", dummy_image)
-    image_net = alex_net(weights, dummy_image)
+    dummy_image = tf.Variable(processed_image)
+    tf.histogram_summary("Image_Output", dummy_image)
+    dream_net = vgg_net(weights, dummy_image)
 
     with tf.Session() as sess:
-        dream_layer_features = dream_net[DREAM_LAYER].eval()
-        loss = 2 * tf.nn.l2_loss(image_net[DREAM_LAYER] - dream_layer_features) / dream_layer_features.size
+        dream_layer_features = dream_net[DREAM_LAYER]
+        L2_loss = 2 * tf.nn.l2_loss(dream_layer_features)
+        dream_layer_features = tf.sub(L2_loss, dream_layer_features)
+        loss = 2 * tf.nn.l2_loss(dream_layer_features) / utils.get_tensor_size(dream_layer_features)
         tf.scalar_summary("Loss", loss)
 
         summary_op = tf.merge_all_summaries()

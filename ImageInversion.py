@@ -11,7 +11,7 @@ import os, sys
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("image_path", "", """Path to image to be inverted""")
-tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the AlexNet model mat file""")
+tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGGNet model mat file""")
 tf.flags.DEFINE_string("log_dir", "logs/ImageInversion_logs/", """Path to save logs and checkpoint if needed""")
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'

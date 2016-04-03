@@ -2,8 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="480f9289-d3f1-47c8-b257-a9954ccdc867" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/NeuralArtist.py" afterPath="$PROJECT_DIR$/NeuralArtist.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TensorflowUtils.py" afterPath="$PROJECT_DIR$/TensorflowUtils.py" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/dream_check_dog_20.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/dream_check_dp.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/events.out.tfevents.1459641020.Saraths-MacBook-Pro.local" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DeepDream.py" afterPath="$PROJECT_DIR$/DeepDream.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageInversion.py" afterPath="$PROJECT_DIR$/ImageInversion.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="TensorflowProjects.iws" />
@@ -25,56 +28,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="NeuralArtist.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/NeuralArtist.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="27" selection-start-line="26" selection-start-column="27" selection-end-line="26" selection-end-column="27" />
-              <folding>
-                <element signature="e#23#46#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ImageAlignment.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ImageAlignment.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DeepDream.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DeepDream.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DeepDream.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="16" column="11" selection-start-line="16" selection-start-column="11" selection-end-line="16" selection-end-column="11" />
+            <state vertical-scroll-proportion="0.65909094">
+              <caret line="100" column="0" selection-start-line="100" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="DeepDream2.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/DeepDream2.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.93607956">
-              <caret line="124" column="43" selection-start-line="124" selection-start-column="43" selection-end-line="124" selection-end-column="43" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NeuralStyle.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/NeuralStyle.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="24" column="36" selection-start-line="24" selection-start-column="27" selection-end-line="24" selection-end-column="36" />
-              <folding>
-                <element signature="e#69#92#0" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -84,6 +43,16 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
               <caret line="33" column="34" selection-start-line="33" selection-start-column="34" selection-end-line="33" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ImageInversion.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ImageInversion.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="13" column="69" selection-start-line="13" selection-start-column="69" selection-end-line="13" selection-end-column="69" />
               <folding />
             </state>
           </provider>
@@ -109,9 +78,11 @@
         <option value="$PROJECT_DIR$/YelpRestaurantClassification2.py" />
         <option value="$PROJECT_DIR$/NeuralArtist.py" />
         <option value="$PROJECT_DIR$/NeuralStyle.py" />
-        <option value="$PROJECT_DIR$/DeepDream.py" />
         <option value="$PROJECT_DIR$/DeepDream2.py" />
         <option value="$PROJECT_DIR$/TensorflowUtils.py" />
+        <option value="$PROJECT_DIR$/ImageIversion.py" />
+        <option value="$PROJECT_DIR$/ImageInversion.py" />
+        <option value="$PROJECT_DIR$/DeepDream.py" />
       </list>
     </option>
   </component>
@@ -424,14 +395,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DeepDream.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="16" column="11" selection-start-line="16" selection-start-column="11" selection-end-line="16" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/NeuralStyle.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -450,6 +413,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/ImageInversion.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="69" selection-start-line="13" selection-start-column="69" selection-end-line="13" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -458,10 +429,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/DeepDream2.py">
+    <entry file="file://$PROJECT_DIR$/DeepDream.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.93607956">
-          <caret line="124" column="43" selection-start-line="124" selection-start-column="43" selection-end-line="124" selection-end-column="43" />
+        <state vertical-scroll-proportion="0.65909094">
+          <caret line="100" column="0" selection-start-line="100" selection-start-column="0" selection-end-line="100" selection-end-column="0" />
           <folding />
         </state>
       </provider>
