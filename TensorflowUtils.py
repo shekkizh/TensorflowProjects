@@ -7,7 +7,7 @@ from six.moves import urllib
 import tarfile
 
 
-def maybe_download_and_extract(dir_path, url_name):
+def maybe_download_and_extract(dir_path, url_name, tarfile=False):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     filename = url_name.split('/')[-1]
@@ -22,15 +22,16 @@ def maybe_download_and_extract(dir_path, url_name):
         print()
         statinfo = os.stat(filepath)
         print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
-        tarfile.open(filepath, 'r:gz').extractall(dir_path)
+        if tarfile:
+            tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
 
-def weight_variable(shape, stddev=0.1, name=""):
+def weight_variable(shape, stddev=0.1, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial, name=name)
+    return tf.Variable(initial,name=name)
 
 
-def bias_variable(shape, name=""):
+def bias_variable(shape, name=None):
     initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial, name=name)
 

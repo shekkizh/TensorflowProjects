@@ -14,7 +14,7 @@ LOG_DIR = "logs/NeuralArtist_logs/"
 
 NEURONS_PER_LAYER = 20
 LEARNING_RATE = 1e-2
-
+MOMENTUM_RATE = 0.9
 MAX_ITERATIONS = 100000
 
 current_index = 0
