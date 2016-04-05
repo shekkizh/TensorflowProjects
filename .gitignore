@@ -2,3 +2,6 @@ MNIST_data
 Models_zoo/
 *.pyc
 ImageAlignment.py
+dp1.jpg
+random.jpg
+vangogh-1.jpg

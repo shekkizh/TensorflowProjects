@@ -26,9 +26,17 @@ def maybe_download_and_extract(dir_path, url_name, tarfile=False):
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
 
+def xavier_init(fan_in, fan_out, constant=1):
+    """ Xavier initialization of network weights"""
+    # https://stackoverflow.com/questions/33640581/how-to-do-xavier-initialization-on-tensorflow
+    low = -constant * np.sqrt(6.0 / (fan_in + fan_out))
+    high = constant * np.sqrt(6.0 / (fan_in + fan_out))
+    return tf.random_uniform((fan_in, fan_out), minval=low, maxval=high, dtype=tf.float32)
+
+
 def weight_variable(shape, stddev=0.1, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial,name=name)
+    return tf.Variable(initial, name=name)
 
 
 def bias_variable(shape, name=None):
@@ -49,6 +57,8 @@ def conv2d_basic(x, W, bias):
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
+def avg_pool_2x2(x):
+    return tf.nn.avg_pool(x,ksize=[1,2,2,1], strides=[1,2,2,1], padding="SAME")
 
 def process_image(image, mean_pixel):
     return (image - mean_pixel).astype(np.float32)
