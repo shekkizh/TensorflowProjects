@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="480f9289-d3f1-47c8-b257-a9954ccdc867" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/DeepDream.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/ImageInversion.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/MNISTBeginner.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/MNISTDeepLearning.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/NeuralArtist.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/NeuralStyle.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/neural_artist_check.jpg" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dog1.jpg" afterPath="$PROJECT_DIR$/dog1.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dream_check.jpg" afterPath="$PROJECT_DIR$/dream_check.jpg" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/output_check.jpg" afterPath="$PROJECT_DIR$/output_check.jpg" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Deblurring.py" afterPath="$PROJECT_DIR$/Deblurring.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TensorflowUtils.py" afterPath="$PROJECT_DIR$/TensorflowUtils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -38,7 +29,7 @@
         <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="53" column="17" selection-start-line="53" selection-start-column="17" selection-end-line="53" selection-end-column="17" />
+              <caret line="69" column="0" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
               <folding>
                 <element signature="e#66#89#0" expanded="true" />
               </folding>
@@ -46,23 +37,51 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DeepDream.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
+      <file leaf-file-name="NeuralArtist.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ImageArt/NeuralArtist.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+              <caret line="145" column="78" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="78" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NeuralStyle.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="NeuralStyle.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.44235924">
-              <caret line="32" column="20" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="98" column="44" selection-start-line="98" selection-start-column="44" selection-end-line="98" selection-end-column="44" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.53276956">
+              <caret line="152" column="8" selection-start-line="152" selection-start-column="4" selection-end-line="152" selection-end-column="8" />
               <folding>
-                <element signature="e#69#92#0" expanded="true" />
+                <element signature="e#92#115#0" expanded="true" />
+                <element signature="e#1452#1574#0" expanded="false" />
+                <element signature="e#1603#1830#0" expanded="false" />
+                <element signature="e#3122#4090#0" expanded="false" />
+                <element signature="e#4123#4257#0" expanded="false" />
+                <element signature="e#4296#5378#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Deblurring.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Deblurring.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="247" column="51" selection-start-line="247" selection-start-column="37" selection-end-line="247" selection-end-column="51" />
+              <folding>
+                <element signature="e#2488#4408#0" expanded="false" />
+                <element signature="e#4449#5365#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -93,8 +112,10 @@
         <option value="$PROJECT_DIR$/ImageInversion.py" />
         <option value="$PROJECT_DIR$/DeepDream.py" />
         <option value="$PROJECT_DIR$/ImageArt/DeepDream.py" />
-        <option value="$PROJECT_DIR$/TensorflowUtils.py" />
+        <option value="$PROJECT_DIR$/Deblurring.py" />
         <option value="$PROJECT_DIR$/ImageArt/NeuralStyle.py" />
+        <option value="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
+        <option value="$PROJECT_DIR$/TensorflowUtils.py" />
       </list>
     </option>
   </component>
@@ -130,6 +151,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -158,13 +180,26 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="logs" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TensorflowProjects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="TensorflowProjects" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="ImageArt" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -315,10 +350,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1280" height="695" extended-state="6" />
-    <editor active="false" />
+    <frame x="0" y="23" width="1280" height="695" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3349917" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17190082" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -351,12 +386,6 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/YelpRestaurantClassification.py</url>
-          <line>2</line>
-        </line-breakpoint>
-      </breakpoints>
       <option name="time" value="1" />
     </breakpoint-manager>
     <watches-manager />
@@ -365,9 +394,29 @@
     <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="53" column="17" selection-start-line="53" selection-start-column="17" selection-end-line="53" selection-end-column="17" />
           <folding>
             <element signature="e#66#89#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <folding>
+            <element signature="e#88#111#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#69#92#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -382,12 +431,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/YelpRestaurantClassification.py">
+    <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.05199307">
-          <caret line="2" column="0" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#24#38#0" expanded="false" />
+            <element signature="e#66#89#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -413,30 +462,64 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
+    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralArtist.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="13" selection-end-column="0" />
+          <caret line="145" column="78" selection-start-line="145" selection-start-column="20" selection-end-line="145" selection-end-column="78" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="98" column="44" selection-start-line="98" selection-start-column="44" selection-end-line="98" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Deblurring.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="247" column="51" selection-start-line="247" selection-start-column="37" selection-end-line="247" selection-end-column="51" />
+          <folding>
+            <element signature="e#2488#4408#0" expanded="false" />
+            <element signature="e#4449#5365#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.6638478">
+          <caret line="8" column="23" selection-start-line="8" selection-start-column="23" selection-end-line="8" selection-end-column="23" />
+          <folding>
+            <element signature="e#88#111#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="53" column="17" selection-start-line="53" selection-start-column="17" selection-end-line="53" selection-end-column="17" />
+          <caret line="69" column="0" selection-start-line="69" selection-start-column="0" selection-end-line="69" selection-end-column="0" />
           <folding>
             <element signature="e#66#89#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
+    <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.44235924">
-          <caret line="32" column="20" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+        <state vertical-scroll-proportion="0.53276956">
+          <caret line="152" column="8" selection-start-line="152" selection-start-column="4" selection-end-line="152" selection-end-column="8" />
           <folding>
-            <element signature="e#69#92#0" expanded="true" />
+            <element signature="e#92#115#0" expanded="true" />
+            <element signature="e#1452#1574#0" expanded="false" />
+            <element signature="e#1603#1830#0" expanded="false" />
+            <element signature="e#3122#4090#0" expanded="false" />
+            <element signature="e#4123#4257#0" expanded="false" />
+            <element signature="e#4296#5378#0" expanded="false" />
           </folding>
         </state>
       </provider>
