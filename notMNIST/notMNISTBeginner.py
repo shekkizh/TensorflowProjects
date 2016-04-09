@@ -22,63 +22,88 @@ tf.flags.DEFINE_string("data_dir", "Data_zoo/notMNIST", "Path to save/ load notM
 
 NUMBER_OF_CLASSES = 10
 IMAGE_SIZE = 28
+MAX_ITERATIONS = 10000
 
 
 def accuracy(logits, labels):
     return 100.0 * np.sum(np.argmax(logits, 1) == np.argmax(labels, 1)) / logits.shape[0]
 
 
+def inference(dataset):
+    # Variables.
+    with tf.name_scope("fc1") as scope:
+        W1 = utils.weight_variable([IMAGE_SIZE * IMAGE_SIZE, 512], name="W1")
+        b1 = utils.bias_variable([512], name="b1")
+        h_fc1 = tf.nn.relu(tf.matmul(dataset, W1) + b1)
+        tf.histogram_summary("W1", W1)
+        tf.histogram_summary("b1", b1)
+
+    with tf.name_scope("fc2") as scope:
+        W2 = utils.weight_variable([512, 512], name="W2")
+        b2 = utils.bias_variable([512], name="b2")
+        h_fc2 = tf.nn.relu(tf.matmul(h_fc1, W2) + b2)
+        tf.histogram_summary("W2", W2)
+        tf.histogram_summary("b2", b2)
+
+    with tf.name_scope("output") as scope:
+        W3 = utils.weight_variable([512, NUMBER_OF_CLASSES], name="W3")
+        b3 = utils.bias_variable([NUMBER_OF_CLASSES], name="b3")
+        logits = tf.matmul(h_fc2, W3) + b3
+        tf.histogram_summary("W3", W3)
+        tf.histogram_summary("b3", b3)
+
+    return logits
+
+
 def main(argv=None):
     train_dataset, train_labels, valid_dataset, valid_labels, test_dataset, test_labels = \
         read_notMNIST.get_notMNISTData(FLAGS.data_dir)
 
-    graph = tf.Graph()
-    with graph.as_default():
-        tf_train_dataset = tf.placeholder(tf.float32,
-                                          shape=(BATCH_SIZE, IMAGE_SIZE * IMAGE_SIZE))
-        tf_train_labels = tf.placeholder(tf.float32, shape=(BATCH_SIZE, NUMBER_OF_CLASSES))
-        tf_valid_dataset = tf.constant(valid_dataset)
-        tf_test_dataset = tf.constant(test_dataset)
+    dataset = tf.placeholder(tf.float32,
+                                      shape=(None, IMAGE_SIZE * IMAGE_SIZE))
+    labels = tf.placeholder(tf.float32, shape=(None, NUMBER_OF_CLASSES))
 
-        # Variables.
-        weights = tf.Variable(
-            tf.truncated_normal([IMAGE_SIZE * IMAGE_SIZE, NUMBER_OF_CLASSES]))
-        biases = tf.Variable(tf.zeros([NUMBER_OF_CLASSES]))
+    logits = inference(dataset)
+    loss = tf.reduce_mean(
+        tf.nn.softmax_cross_entropy_with_logits(logits, labels))
+    tf.scalar_summary("train_loss", loss)
 
-        # Training computation.
-        logits = tf.matmul(tf_train_dataset, weights) + biases
-        loss = tf.reduce_mean(
-            tf.nn.softmax_cross_entropy_with_logits(logits, tf_train_labels))
+    # Optimizer.
+    optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
 
-        # Optimizer.
-        optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
+    summary_op = tf.merge_all_summaries()
+    summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir)
 
-        # Predictions for the training, validation, and test data.
-        train_prediction = tf.nn.softmax(logits)
-        valid_prediction = tf.nn.softmax(
-            tf.matmul(tf_valid_dataset, weights) + biases)
-        test_prediction = tf.nn.softmax(tf.matmul(tf_test_dataset, weights) + biases)
+    # Predictions for the training, validation, and test data.
+    prediction = tf.nn.softmax(logits)
 
-    num_steps = 3001
-
-    with tf.Session(graph=graph) as session:
+    with tf.Session() as session:
         tf.initialize_all_variables().run()
+
         print("Initialized")
-        for step in range(num_steps):
+        for step in range(1, MAX_ITERATIONS):
             offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
 
             batch_data = train_dataset[offset:(offset + BATCH_SIZE), :]
             batch_labels = train_labels[offset:(offset + BATCH_SIZE), :]
 
-            feed_dict = {tf_train_dataset: batch_data, tf_train_labels: batch_labels}
-            l, predictions = session.run(
-                [loss, train_prediction], feed_dict=feed_dict)
-            if step % 500 == 0:
+            feed_dict = {dataset: batch_data, labels: batch_labels}
+            _, l, predictions = session.run(
+                [optimizer, loss, prediction], feed_dict=feed_dict)
+            if step % 200 == 0:
                 print("Minibatch loss at step %d: %f" % (step, l))
                 print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
-                print("Validation accuracy: %.1f%%" % accuracy(
-                    valid_prediction.eval(), valid_labels))
-        print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+                summary_str = session.run(summary_op, feed_dict=feed_dict)
+                summary_writer.add_summary(summary_str, global_step=step)
+
+            if step % 1000 == 0:
+                validation_pred = session.run(prediction, feed_dict={dataset:valid_dataset})
+                print("-----------> Validation accuracy: %.1f%%" % accuracy(
+                    validation_pred, valid_labels))
+
+
+        test_pred = session.run(prediction, feed_dict={dataset:test_dataset})
+        print("Test accuracy: %.1f%%" % accuracy(test_pred, test_labels))
 
 
 if __name__ == "__main__":
