@@ -17,7 +17,7 @@ import TensorflowUtils as utils
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGG model mat file""")
-tf.flags.DEFINE_string("data_dir", "Models_zoo/", """Path to the CIFAR10 data""")
+tf.flags.DEFINE_string("data_dir", "Data/CIFAR10/", """Path to the CIFAR10 data""")
 tf.flags.DEFINE_string("style_path", "", """Path to style image to use""")
 tf.flags.DEFINE_string("mode", "train", "Network mode train/ test")
 tf.flags.DEFINE_string("test_image", "", "Path to test image - read only if mode is test")
