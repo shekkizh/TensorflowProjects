@@ -11,31 +11,32 @@ if utils_path not in sys.path:
     sys.path.insert(0, utils_path)
 import TensorflowUtils as utils
 
+BATCH_SIZE = 128
 TRAIN_DATA_URL = 'http://commondatastorage.googleapis.com/books1000/notMNIST_large.tar.gz'
 TEST_DATA_URL = 'http://commondatastorage.googleapis.com/books1000/notMNIST_small.tar.gz'
 
-FLAGS = tf.app.flags
-tf.app.flags.DEFINE_string("mode", "train", "Mode train/ test")
-tf.app.flags.DEFINE_string("logs_dir", "logs/notMNIST_logs", "Path to save log and train checkpoints")
+FLAGS = tf.flags.FLAGS
+tf.flags.DEFINE_string("mode", "train", "Mode train/ test")
+tf.flags.DEFINE_string("logs_dir", "logs/notMNIST_logs", "Path to save log and train checkpoints")
+tf.flags.DEFINE_string("data_dir", "Data_zoo/notMNIST", "Path to save/ load notMNIST data")
 
 NUMBER_OF_CLASSES = 10
 IMAGE_SIZE = 28
 
 
+def accuracy(logits, labels):
+    return 100.0 * np.sum(np.argmax(logits, 1) == np.argmax(labels, 1)) / logits.shape[0]
+
+
 def main(argv=None):
-    train_dataset, train_labels, valid_dataset, valid_labels, test_dataset, test_labels = read_notMNIST.get_notMNISTData()
-    # With gradient descent training, even this much data is prohibitive.
-    # Subset the training data for faster turnaround.
-    train_subset = 10000
-    batch_size = 128
+    train_dataset, train_labels, valid_dataset, valid_labels, test_dataset, test_labels = \
+        read_notMNIST.get_notMNISTData(FLAGS.data_dir)
 
     graph = tf.Graph()
     with graph.as_default():
-        # Input data. For the training data, we use a placeholder that will be fed
-        # at run time with a training minibatch.
         tf_train_dataset = tf.placeholder(tf.float32,
-                                          shape=(batch_size, IMAGE_SIZE * IMAGE_SIZE))
-        tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, NUMBER_OF_CLASSES))
+                                          shape=(BATCH_SIZE, IMAGE_SIZE * IMAGE_SIZE))
+        tf_train_labels = tf.placeholder(tf.float32, shape=(BATCH_SIZE, NUMBER_OF_CLASSES))
         tf_valid_dataset = tf.constant(valid_dataset)
         tf_test_dataset = tf.constant(test_dataset)
 
@@ -64,19 +65,15 @@ def main(argv=None):
         tf.initialize_all_variables().run()
         print("Initialized")
         for step in range(num_steps):
-            # Pick an offset within the training data, which has been randomized.
-            # Note: we could use better randomization across epochs.
-            offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
-            # Generate a minibatch.
-            batch_data = train_dataset[offset:(offset + batch_size), :]
-            batch_labels = train_labels[offset:(offset + batch_size), :]
-            # Prepare a dictionary telling the session where to feed the minibatch.
-            # The key of the dictionary is the placeholder node of the graph to be fed,
-            # and the value is the numpy array to feed to it.
+            offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
+
+            batch_data = train_dataset[offset:(offset + BATCH_SIZE), :]
+            batch_labels = train_labels[offset:(offset + BATCH_SIZE), :]
+
             feed_dict = {tf_train_dataset: batch_data, tf_train_labels: batch_labels}
-            _, l, predictions = session.run(
-                [optimizer, loss, train_prediction], feed_dict=feed_dict)
-            if (step % 500 == 0):
+            l, predictions = session.run(
+                [loss, train_prediction], feed_dict=feed_dict)
+            if step % 500 == 0:
                 print("Minibatch loss at step %d: %f" % (step, l))
                 print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
                 print("Validation accuracy: %.1f%%" % accuracy(

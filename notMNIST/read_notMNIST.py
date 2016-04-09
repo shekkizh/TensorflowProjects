@@ -1,5 +1,5 @@
 __author__ = 'Charlie'
-#Converting udacity tensorflow tutorial code such that notMNIST can be accessed with ease
+# Converting udacity tensorflow tutorial code such that notMNIST can be accessed with ease
 import numpy as np
 import os
 import sys
@@ -18,11 +18,12 @@ image_size = 28  # Pixel width and height.
 pixel_depth = 255.0  # Number of levels per pixel.
 
 
-def maybe_download(filename, expected_bytes, force=False):
+def maybe_download(dir_path, filename, expected_bytes, force=False):
     """Download a file if not present, and make sure it's the right size."""
-    if force or not os.path.exists(filename):
-        filename, _ = urlretrieve(url + filename, filename)
-    statinfo = os.stat(filename)
+    file_path = os.path.join(dir_path, filename)
+    if force or not os.path.exists(file_path):
+        file_path, _ = urlretrieve(url + filename, file_path)
+    statinfo = os.stat(file_path)
     if statinfo.st_size == expected_bytes:
         print('Found and verified', filename)
     else:
@@ -31,16 +32,16 @@ def maybe_download(filename, expected_bytes, force=False):
     return filename
 
 
-def maybe_extract(filename, force=False):
-    root = os.path.splitext(os.path.splitext(filename)[0])[0]  # remove .tar.gz
+def maybe_extract(dir_path, filename, force=False):
+    root = os.path.join(dir_path, os.path.splitext(os.path.splitext(filename)[0])[0])  # remove .tar.gz
     if os.path.isdir(root) and not force:
         # You may override by setting force=True.
         print('%s already present - Skipping extraction of %s.' % (root, filename))
     else:
         print('Extracting data for %s. This may take a while. Please wait.' % root)
-        tar = tarfile.open(filename)
+        tar = tarfile.open(os.path.join(dir_path, filename))
         sys.stdout.flush()
-        tar.extractall()
+        tar.extractall(dir_path)
         tar.close()
     data_folders = [
         os.path.join(root, d) for d in sorted(os.listdir(root))
@@ -161,12 +162,13 @@ def reformat(dataset, labels):
     labels = (np.arange(num_classes) == labels[:, None]).astype(np.float32)
     return dataset, labels
 
-def initialize_read():
-    train_filename = maybe_download('notMNIST_large.tar.gz', 247336696)
-    test_filename = maybe_download('notMNIST_small.tar.gz', 8458043)
 
-    train_folders = maybe_extract(train_filename)
-    test_folders = maybe_extract(test_filename)
+def initialize_read(data_dir):
+    train_filename = maybe_download(data_dir, 'notMNIST_large.tar.gz', 247336696)
+    test_filename = maybe_download(data_dir, 'notMNIST_small.tar.gz', 8458043)
+
+    train_folders = maybe_extract(data_dir, train_filename)
+    test_folders = maybe_extract(data_dir, test_filename)
 
     train_datasets = maybe_pickle(train_folders, 45000)
     test_datasets = maybe_pickle(test_folders, 1800)
@@ -187,7 +189,7 @@ def initialize_read():
     test_dataset, test_labels = randomize(test_dataset, test_labels)
     valid_dataset, valid_labels = randomize(valid_dataset, valid_labels)
 
-    pickle_file = 'notMNIST.pickle'
+    pickle_file = os.path.join(data_dir, 'notMNIST.pickle')
 
     try:
         f = open(pickle_file, 'wb')
@@ -209,10 +211,10 @@ def initialize_read():
     print('Compressed pickle size:', statinfo.st_size)
 
 
-def get_notMNISTData():
-    initialize_read()
+def get_notMNISTData(data_dir):
+    initialize_read(data_dir)
 
-    pickle_file = 'notMNIST.pickle'
+    pickle_file = os.path.join(data_dir, 'notMNIST.pickle')
 
     with open(pickle_file, 'rb') as f:
         save = pickle.load(f)
