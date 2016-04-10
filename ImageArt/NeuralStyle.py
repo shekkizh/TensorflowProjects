@@ -19,15 +19,15 @@ tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGG model mat 
 tf.flags.DEFINE_string("content_path", "", """Path to content image to be drawn in different style""")
 tf.flags.DEFINE_string("style_path", "", """Path to style image to use""")
 
-tf.flags.DEFINE_string("log_dir", "Neural_style/", """Path to save logs and checkpoint if needed""")
+tf.flags.DEFINE_string("log_dir", "logs/Neural_style_logs/", """Path to save logs and checkpoint if needed""")
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
-CONTENT_WEIGHT = 2e-4
-CONTENT_LAYERS = ('conv4_2',)
+CONTENT_WEIGHT = 2e-3
+CONTENT_LAYERS = ('relu2_2',)
 
 STYLE_WEIGHT = 2e-1
-STYLE_LAYERS = ('conv1_1', 'conv2_1', 'conv3_1', 'conv4_1', 'conv5_1')
+STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3','relu4_2')
 
 VARIATION_WEIGHT = 1
 LEARNING_RATE = 1e-2
@@ -98,9 +98,9 @@ def main(argv=None):
 
     content_image = get_image(FLAGS.content_path)
     print content_image.shape
-    processed_content = utils.process_image(content_image, mean_pixel)
+    processed_content = utils.process_image(content_image, mean_pixel).astype(np.float32)
     style_image = get_image(FLAGS.style_path)
-    processed_style = utils.process_image(style_image, mean_pixel)
+    processed_style = utils.process_image(style_image, mean_pixel).astype(np.float32)
 
     content_net = vgg_net(weights, processed_content)
 

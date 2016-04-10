@@ -32,7 +32,7 @@ CONTENT_WEIGHT = 2e-3
 CONTENT_LAYER = 'relu2_2'
 
 STYLE_WEIGHT = 2e-1
-STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3', 'relu4_3')
+STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3')
 
 VARIATION_WEIGHT = 1e-4
 
@@ -67,11 +67,11 @@ def vgg_net(weights, image):
         'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
         'relu3_3', 'conv3_4', 'relu3_4', 'pool3',
 
-        'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
-        'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
-
-        'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3',
-        'relu5_3', 'conv5_4', 'relu5_4'
+        # 'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
+        # 'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
+        #
+        # 'conv5_1', 'relu5_1', 'conv5_2', 'relu5_2', 'conv5_3',
+        # 'relu5_3', 'conv5_4', 'relu5_4'
     )
 
     net = {}
@@ -113,12 +113,12 @@ def read_cifar10(sess, model_params, filename_queue):
 
     record_bytes = tf.decode_raw(value, tf.uint8)
 
-    depth_major = tf.reshape(tf.slice(record_bytes, [label_bytes], [image_bytes]),
-                             [result.depth, result.height, result.width])
+    depth_major = tf.cast(tf.reshape(tf.slice(record_bytes, [label_bytes], [image_bytes]),
+                             [result.depth, result.height, result.width]), tf.float32)
 
-    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel']).astype(tf.float32)
-    result.net = vgg_net(model_params["weights"],
-                         tf.reshape(result.image, (1, result.height, result.width, result.depth)))
+    result.image =  utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel'])
+    extended_image =tf.reshape(result.image, (1, result.height, result.width, result.depth))
+    result.net = vgg_net(model_params["weights"], extended_image)
     result.content_features = sess.run(result.net[CONTENT_LAYER])
     return result
 
