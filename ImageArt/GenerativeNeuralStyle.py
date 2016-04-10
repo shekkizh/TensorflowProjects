@@ -20,7 +20,7 @@ tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGG model mat 
 tf.flags.DEFINE_string("data_dir", "Data_zoo/CIFAR10_data/", """Path to the CIFAR10 data""")
 tf.flags.DEFINE_string("style_path", "", """Path to style image to use""")
 tf.flags.DEFINE_string("mode", "train", "Network mode train/ test")
-tf.flags.DEFINE_string("test_image", "", "Path to test image - read only if mode is test")
+tf.flags.DEFINE_string("test_image_path", "", "Path to test image - read only if mode is test")
 
 tf.flags.DEFINE_string("log_dir", "logs/GenerativeNeural_style/", """Path to save logs and checkpoint if needed""")
 
@@ -116,7 +116,7 @@ def read_cifar10(sess, model_params, filename_queue):
     depth_major = tf.reshape(tf.slice(record_bytes, [label_bytes], [image_bytes]),
                              [result.depth, result.height, result.width])
 
-    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel'])
+    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel']).astype(tf.float32)
     result.net = vgg_net(model_params["weights"],
                          tf.reshape(result.image, (1, result.height, result.width, result.depth)))
     result.content_features = sess.run(result.net[CONTENT_LAYER])
@@ -154,28 +154,28 @@ def inference(input_image):
     b1 = utils.bias_variable([32])
     hconv_1 = tf.nn.relu(tf.matmul(input_image,W1) + b1)
     h_norm = utils.batch_norm(hconv_1)
-    bottleneck_1 = utils.bottleneck_unit(input_image,16, 16,down_stride=True,name="res_1")
+    bottleneck_1 = utils.bottleneck_unit(h_norm,16, 16,down_stride=True,name="res_1")
     bottleneck_2 = utils.bottleneck_unit(bottleneck_1,8, 8, down_stride=True, name="res_2")
     bottleneck_3 = utils.bottleneck_unit(bottleneck_2,16, 16,up_stride=True,name="res_3")
     bottleneck_4 = utils.bottleneck_unit(bottleneck_3,32, 32, up_stride=True, name="res_4")
     W5 = utils.weight_variable([32, 3])
     b5 = utils.bias_variable([3])
-    out = tf.nn.tanh(tf.matmul(bottleneck_4, W5) + b5)
-
+    out = tf.nn.tanh(utils.conv2d_basic(bottleneck_4, W5, b5))
+    return out
 
 
 def test(sess, mean_pixel):
-    content_image = get_image(FLAGS.content_path)
+    content_image = get_image(FLAGS.test_image_path)
     print content_image.shape
     processed_content = utils.process_image(content_image, mean_pixel)
-    best = inference(processed_content)
-    output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel)
+    best = sess.run(inference(processed_content))
+    output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel).astype(np.float32)
     scipy.misc.imsave("output.jpg", output)
 
 
 def main(argv=None):
     utils.maybe_download_and_extract(FLAGS.model_dir, MODEL_URL)
-    utils.maybe_download_and_extract(FLAGS.data_dir, DATA_URL, tarfile=True)
+    utils.maybe_download_and_extract(FLAGS.data_dir, DATA_URL, is_tarfile=True)
     model_data = get_model_data()
     model_params = {}
 
@@ -185,7 +185,7 @@ def main(argv=None):
     model_params['weights'] = np.squeeze(model_data['layers'])
 
     style_image = get_image(FLAGS.style_path)
-    processed_style = utils.process_image(style_image, model_params['mean_pixel'])
+    processed_style = utils.process_image(style_image, model_params['mean_pixel']).astype(np.float32)
     style_net = vgg_net(model_params['weights'], processed_style)
     tf.image_summary("Style_Image", style_image)
 
