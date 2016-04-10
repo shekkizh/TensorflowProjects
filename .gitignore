@@ -3,3 +3,10 @@ CIFAR10_Data
 Yelp_Data
 random_batch.csv
 Yelp_logs/
+Models_zoo/
+*.pyc
+ImageAlignment.py
+dp1.jpg
+random.jpg
+vangogh-1.jpg
+Data_zoo/notMNIST/

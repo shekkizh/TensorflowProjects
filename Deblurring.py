@@ -29,11 +29,6 @@ IMAGE_SIZE = 32
 
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
-
-def conv2d_basic(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding="SAME")
-
-
 def activation_summary(x):
     """Helper to create summaries for activations."""
     tf.histogram_summary(x.op.name + '/activations', x)
