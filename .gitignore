@@ -1,1 +1,5 @@
 MNIST_data
+CIFAR10_Data
+Yelp_Data
+random_batch.csv
+Yelp_logs/
