@@ -7,7 +7,7 @@ from six.moves import urllib
 import tarfile
 
 
-def maybe_download_and_extract(dir_path, url_name, tarfile=False):
+def maybe_download_and_extract(dir_path, url_name, is_tarfile=False):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     filename = url_name.split('/')[-1]
@@ -22,7 +22,7 @@ def maybe_download_and_extract(dir_path, url_name, tarfile=False):
         print()
         statinfo = os.stat(filepath)
         print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
-        if tarfile:
+        if is_tarfile:
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
 

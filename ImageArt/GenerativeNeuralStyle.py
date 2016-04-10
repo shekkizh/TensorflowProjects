@@ -175,7 +175,7 @@ def test(sess, mean_pixel):
 
 def main(argv=None):
     utils.maybe_download_and_extract(FLAGS.model_dir, MODEL_URL)
-    utils.maybe_download_and_extract(FLAGS.data_dir, DATA_URL, tarfile=True)
+    utils.maybe_download_and_extract(FLAGS.data_dir, DATA_URL, is_tarfile=True)
     model_data = get_model_data()
     model_params = {}
 
