@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="480f9289-d3f1-47c8-b257-a9954ccdc867" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" afterPath="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TensorflowUtils.py" afterPath="$PROJECT_DIR$/TensorflowUtils.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="TensorflowProjects.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -36,18 +36,41 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.6138107">
-              <caret line="22" column="28" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="19" column="57" selection-start-line="19" selection-start-column="57" selection-end-line="19" selection-end-column="57" />
               <folding>
-                <element signature="e#1454#1576#0" expanded="false" />
-                <element signature="e#1605#1832#0" expanded="false" />
-                <element signature="e#1868#3063#0" expanded="false" />
-                <element signature="e#3124#4092#0" expanded="false" />
-                <element signature="e#4125#4259#0" expanded="false" />
-                <element signature="e#4298#5380#0" expanded="false" />
+                <element signature="e#1463#1585#0" expanded="false" />
+                <element signature="e#1614#1841#0" expanded="false" />
+                <element signature="e#1877#3072#0" expanded="false" />
+                <element signature="e#3133#4101#0" expanded="false" />
+                <element signature="e#4134#4268#0" expanded="false" />
+                <element signature="e#4307#5389#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NeuralStyle.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-4.122768">
+              <caret line="25" column="21" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Deblurring.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Deblurring.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="13" column="67" selection-start-line="13" selection-start-column="67" selection-end-line="13" selection-end-column="67" />
+              <folding>
+                <element signature="e#2488#4408#0" expanded="false" />
+                <element signature="e#4449#5365#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -357,7 +380,7 @@
     <frame x="0" y="23" width="1280" height="695" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30514097" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2106136" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -427,11 +450,11 @@
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#92#115#0" expanded="false" />
-            <element signature="e#1454#1576#0" expanded="false" />
-            <element signature="e#1605#1832#0" expanded="false" />
-            <element signature="e#3124#4092#0" expanded="false" />
-            <element signature="e#4125#4259#0" expanded="false" />
-            <element signature="e#4298#5380#0" expanded="false" />
+            <element signature="e#1463#1585#0" expanded="false" />
+            <element signature="e#1614#1841#0" expanded="false" />
+            <element signature="e#3133#4101#0" expanded="false" />
+            <element signature="e#4134#4268#0" expanded="false" />
+            <element signature="e#4307#5389#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -513,17 +536,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Deblurring.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="6.5827336">
-          <caret line="247" column="51" selection-start-line="247" selection-start-column="37" selection-end-line="247" selection-end-column="51" />
-          <folding>
-            <element signature="e#2488#4408#0" expanded="false" />
-            <element signature="e#4449#5365#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/notMNIST/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -568,14 +580,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.597015">
-          <caret line="25" column="21" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ImageArt/NeuralArtist.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34526855">
@@ -604,18 +608,37 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Deblurring.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="67" selection-start-line="13" selection-start-column="67" selection-end-line="13" selection-end-column="67" />
+          <folding>
+            <element signature="e#2488#4408#0" expanded="false" />
+            <element signature="e#4449#5365#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.6138107">
-          <caret line="22" column="28" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="57" selection-start-line="19" selection-start-column="57" selection-end-line="19" selection-end-column="57" />
           <folding>
-            <element signature="e#1454#1576#0" expanded="false" />
-            <element signature="e#1605#1832#0" expanded="false" />
-            <element signature="e#1868#3063#0" expanded="false" />
-            <element signature="e#3124#4092#0" expanded="false" />
-            <element signature="e#4125#4259#0" expanded="false" />
-            <element signature="e#4298#5380#0" expanded="false" />
+            <element signature="e#1463#1585#0" expanded="false" />
+            <element signature="e#1614#1841#0" expanded="false" />
+            <element signature="e#1877#3072#0" expanded="false" />
+            <element signature="e#3133#4101#0" expanded="false" />
+            <element signature="e#4134#4268#0" expanded="false" />
+            <element signature="e#4307#5389#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/NeuralStyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.122768">
+          <caret line="25" column="21" selection-start-line="25" selection-start-column="21" selection-end-line="25" selection-end-column="21" />
+          <folding />
         </state>
       </provider>
     </entry>
