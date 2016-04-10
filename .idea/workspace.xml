@@ -24,11 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="TensorflowUtils.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="TensorflowUtils.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.6496165">
-              <caret line="132" column="72" selection-start-line="132" selection-start-column="72" selection-end-line="132" selection-end-column="72" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="97" column="56" selection-start-line="97" selection-start-column="56" selection-end-line="97" selection-end-column="56" />
               <folding>
                 <element signature="e#66#89#0" expanded="true" />
               </folding>
@@ -36,14 +36,15 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="152" column="0" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.6138107">
+              <caret line="22" column="28" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
               <folding>
                 <element signature="e#1454#1576#0" expanded="false" />
                 <element signature="e#1605#1832#0" expanded="false" />
+                <element signature="e#1868#3063#0" expanded="false" />
                 <element signature="e#3124#4092#0" expanded="false" />
                 <element signature="e#4125#4259#0" expanded="false" />
                 <element signature="e#4298#5380#0" expanded="false" />
@@ -86,8 +87,8 @@
         <option value="$PROJECT_DIR$/notMNIST/notMNISTConv.py" />
         <option value="$PROJECT_DIR$/MNIST/MNISTDeepLearning.py" />
         <option value="$PROJECT_DIR$/notMNIST/notMNIST.py" />
-        <option value="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
         <option value="$PROJECT_DIR$/TensorflowUtils.py" />
+        <option value="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
       </list>
     </option>
   </component>
@@ -151,20 +152,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="notMNIST" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="TensorflowProjects" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="TensorflowProjects" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="logs" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -589,16 +576,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/notMNIST/notMNIST.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="5.4859333">
-          <caret line="143" column="73" selection-start-line="143" selection-start-column="73" selection-end-line="143" selection-end-column="73" />
-          <folding>
-            <element signature="e#23#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ImageArt/NeuralArtist.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.34526855">
@@ -607,26 +584,37 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
+    <entry file="file://$PROJECT_DIR$/notMNIST/notMNIST.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="152" column="0" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.4629156">
+          <caret line="39" column="34" selection-start-line="39" selection-start-column="24" selection-end-line="39" selection-end-column="34" />
           <folding>
-            <element signature="e#1454#1576#0" expanded="false" />
-            <element signature="e#1605#1832#0" expanded="false" />
-            <element signature="e#3124#4092#0" expanded="false" />
-            <element signature="e#4125#4259#0" expanded="false" />
-            <element signature="e#4298#5380#0" expanded="false" />
+            <element signature="e#23#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.6496165">
-          <caret line="132" column="72" selection-start-line="132" selection-start-column="72" selection-end-line="132" selection-end-column="72" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="97" column="56" selection-start-line="97" selection-start-column="56" selection-end-line="97" selection-end-column="56" />
           <folding>
             <element signature="e#66#89#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.6138107">
+          <caret line="22" column="28" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
+          <folding>
+            <element signature="e#1454#1576#0" expanded="false" />
+            <element signature="e#1605#1832#0" expanded="false" />
+            <element signature="e#1868#3063#0" expanded="false" />
+            <element signature="e#3124#4092#0" expanded="false" />
+            <element signature="e#4125#4259#0" expanded="false" />
+            <element signature="e#4298#5380#0" expanded="false" />
           </folding>
         </state>
       </provider>

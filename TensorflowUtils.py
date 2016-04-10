@@ -95,7 +95,7 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride = False, up_stride = Fa
         :param name: name of the operation
         :return: local response normalized tensor - not using batch normalization :(
         """
-        return tf.nn.lrn(tensor, depth_radius=5, bias=1e-4, beta=0.75, name=name)
+        return tf.nn.lrn(tensor, depth_radius=5, bias=2, alpha=1e-4, beta=0.75, name=name)
 
     in_chans = x.get_shape().as_list()[3]
 
