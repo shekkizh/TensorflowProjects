@@ -67,21 +67,20 @@ def batch_norm(x):
 
 
 def process_image(image, mean_pixel):
-    return (image - mean_pixel).astype(np.float32)
+    return image - mean_pixel
 
 
 def unprocess_image(image, mean_pixel):
-    return (image + mean_pixel).astype(np.float32)
+    return image + mean_pixel
 
 
-def bottleneck_unit(x, out_chan1, out_chan2, down_stride = False, up_stride = False, name=None):
-
+def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False, name=None):
     def conv_transpose(tensor, out_channel, shape, strides, name=None):
         out_shape = tensor.get_shape().as_list()
         in_channel = out_shape[-1]
         kernel = weight_variable([shape, shape, out_channel, in_channel], name=name)
         shape[-1] = out_channel
-        return tf.nn.conv2d_transpose(x, kernel, output_shape= out_shape, strides=[1, strides, strides, 1],
+        return tf.nn.conv2d_transpose(x, kernel, output_shape=out_shape, strides=[1, strides, strides, 1],
                                       padding='SAME', name='conv_transpose')
 
     def conv(tensor, out_channel, shape, strides, name=None):
@@ -110,7 +109,8 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride = False, up_stride = Fa
         else:
             with tf.variable_scope('branch1'):
                 if up_stride:
-                    b1 = conv_transpose(x, out_chans=out_chan2, shape=1, strides=first_stride, name='res%s_branch1' % name)
+                    b1 = conv_transpose(x, out_chans=out_chan2, shape=1, strides=first_stride,
+                                        name='res%s_branch1' % name)
                 else:
                     b1 = conv(x, out_chans=out_chan2, shape=1, strides=first_stride, name='res%s_branch1' % name)
                 b1 = bn(b1, 'bn%s_branch1' % name, 'scale%s_branch1' % name)
@@ -120,17 +120,17 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride = False, up_stride = Fa
                 b2 = conv_transpose(x, out_chans=out_chan1, shape=1, strides=first_stride, name='res%s_branch2a' % name)
             else:
                 b2 = conv(x, out_chans=out_chan1, shape=1, strides=first_stride, name='res%s_branch2a' % name)
-            b2 = bn(b2,'bn%s_branch2a' % name, 'scale%s_branch2a' % name)
+            b2 = bn(b2, 'bn%s_branch2a' % name, 'scale%s_branch2a' % name)
             b2 = tf.nn.relu(b2, name='relu')
 
         with tf.variable_scope('branch2b'):
             b2 = conv(b2, out_chans=out_chan1, shape=3, strides=1, name='res%s_branch2b' % name)
-            b2 = bn(b2,'bn%s_branch2b' % name, 'scale%s_branch2b' % name)
+            b2 = bn(b2, 'bn%s_branch2b' % name, 'scale%s_branch2b' % name)
             b2 = tf.nn.relu(b2, name='relu')
 
         with tf.variable_scope('branch2c'):
             b2 = conv(b2, out_chans=out_chan2, shape=1, strides=1, name='res%s_branch2c' % name)
-            b2 = bn(b2,'bn%s_branch2c' % name, 'scale%s_branch2c' % name)
+            b2 = bn(b2, 'bn%s_branch2c' % name, 'scale%s_branch2c' % name)
 
         x = b1 + b2
         return tf.nn.relu(x, name='relu')
