@@ -57,11 +57,14 @@ def conv2d_basic(x, W, bias):
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
+
 def avg_pool_2x2(x):
-    return tf.nn.avg_pool(x,ksize=[1,2,2,1], strides=[1,2,2,1], padding="SAME")
+    return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
+
 
 def batch_norm(x):
     return tf.nn.lrn(x, depth_radius=5, bias=2, alpha=1e-4, beta=0.75)
+
 
 def process_image(image, mean_pixel):
     return (image - mean_pixel).astype(np.float32)
@@ -71,209 +74,63 @@ def unprocess_image(image, mean_pixel):
     return (image + mean_pixel).astype(np.float32)
 
 
-def deep_residual_block(incoming, nb_blocks, bottleneck_size, out_channels,
-                        downsample=False, downsample_strides=2,
-                        activation='relu', batch_norm=True, bias=False,
-                        weights_init='uniform_scaling', bias_init='zeros',
-                        regularizer=None, weight_decay=0.001, trainable=True,
-                        restore=True, name="DeepResidualBlock"):
-    """ Deep Residual Block.
-    A deep residual block as described in MSRA's Deep Residual Network paper.
-    Notice: Because TensorFlow doesn't support a strides > filter size,
-    an average pooling is used as a fix, but decrease performances.
-    Input:
-        4-D Tensor [batch, height, width, in_channels].
-    Output:
-        4-D Tensor [batch, new height, new width, nb_filter].
-    Arguments:
-        incoming: `Tensor`. Incoming 4-D Layer.
-        nb_blocks: `int`. Number of layer blocks.
-        bottleneck_size: `int`. The number of convolutional filter of the
-            bottleneck convolutional layer.
-        out_channels: `int`. The number of convolutional filters of the
-            layers surrounding the bottleneck layer.
-        downsample:
-        downsample_strides:
-        activation: `str` (name) or `Tensor`. Activation applied to this layer.
-             Default: 'linear'.
-        batch_norm: `bool`. If True, apply batch normalization.
-        bias: `bool`. If True, a bias is used.
-        weights_init: `str` (name) or `Tensor`. Weights initialization.
-           Default: 'uniform_scaling'.
-        bias_init: `str` (name) or `tf.Tensor`. Bias initialization.
-             Default: 'zeros'.
-        regularizer: `str` (name) or `Tensor`. Add a regularizer to this
-            layer weights. Default: None.
-        weight_decay: `float`. Regularizer decay parameter. Default: 0.001.
-        trainable: `bool`. If True, weights will be trainable.
-        restore: `bool`. If True, this layer weights will be restored when
-            loading a model
-        name: A name for this layer (optional). Default: 'DeepBottleneck'.
-    References:
-        Deep Residual Learning for Image Recognition. Kaiming He, Xiangyu
-        Zhang, Shaoqing Ren, Jian Sun. 2015.
-    Links:
-        [http://arxiv.org/pdf/1512.03385v1.pdf]
-        (http://arxiv.org/pdf/1512.03385v1.pdf)
-    """
-    resnet = incoming
-    in_channels = incoming.get_shape().as_list()[-1]
+def bottleneck_unit(x, out_chan1, out_chan2, down_stride = False, up_stride = False, name=None):
 
-    with tf.name_scope(name):
-        for i in range(nb_blocks):
-            with tf.name_scope('ResidualBlock'):
+    def conv_transpose(tensor, out_channel, shape, strides, name=None):
+        out_shape = tensor.get_shape().as_list()
+        in_channel = out_shape[-1]
+        kernel = weight_variable([shape, shape, out_channel, in_channel], name=name)
+        shape[-1] = out_channel
+        return tf.nn.conv2d_transpose(x, kernel, output_shape= out_shape, strides=[1, strides, strides, 1],
+                                      padding='SAME', name='conv_transpose')
 
-                identity = resnet
+    def conv(tensor, out_channel, shape, strides, name=None):
+        in_channel = tensor.get_shape().as_list()[-1]
+        kernel = weight_variable([shape, shape, in_channel, out_channel], name=name)
+        return tf.nn.conv2d(x, kernel, strides=[1, strides, strides, 1], padding='SAME', name='conv')
 
-                if downsample:
-                    # Use average pooling, because TensorFlow conv_2d can't
-                    # accept kernel size < strides.
-                    resnet = avg_pool_2d(resnet, downsample_strides,
-                                         downsample_strides)
-                    resnet = conv_2d(resnet, bottleneck_size, 1, 1, 'valid',
-                                     activation, bias, weights_init,
-                                     bias_init, regularizer, weight_decay,
-                                     trainable, restore)
+    def bn(tensor, name=None):
+        """
+        :param tensor: 4D tensor input
+        :param name: name of the operation
+        :return: local response normalized tensor - not using batch normalization :(
+        """
+        return tf.nn.lrn(tensor, depth_radius=5, bias=1e-4, beta=0.75, name=name)
+
+    in_chans = x.get_shape().as_list()[3]
+
+    if down_stride or up_stride:
+        first_stride = 2
+    else:
+        first_stride = 1
+
+    with tf.variable_scope('res%s' % name):
+        if in_chans == out_chan2:
+            b1 = x
+        else:
+            with tf.variable_scope('branch1'):
+                if up_stride:
+                    b1 = conv_transpose(x, out_chans=out_chan2, shape=1, strides=first_stride, name='res%s_branch1' % name)
                 else:
-                    resnet = conv_2d(resnet, bottleneck_size, 1, 1, 'valid',
-                                     activation, bias, weights_init,
-                                     bias_init, regularizer, weight_decay,
-                                     trainable, restore)
-                if batch_norm:
-                    resnet = tflearn.batch_normalization(resnet)
+                    b1 = conv(x, out_chans=out_chan2, shape=1, strides=first_stride, name='res%s_branch1' % name)
+                b1 = bn(b1, 'bn%s_branch1' % name, 'scale%s_branch1' % name)
 
-                resnet = conv_2d(resnet, bottleneck_size, 3, 1, 'same',
-                                 activation, bias, weights_init,
-                                 bias_init, regularizer, weight_decay,
-                                 trainable, restore)
-                if batch_norm:
-                    resnet = tflearn.batch_normalization(resnet)
+        with tf.variable_scope('branch2a'):
+            if up_stride:
+                b2 = conv_transpose(x, out_chans=out_chan1, shape=1, strides=first_stride, name='res%s_branch2a' % name)
+            else:
+                b2 = conv(x, out_chans=out_chan1, shape=1, strides=first_stride, name='res%s_branch2a' % name)
+            b2 = bn(b2,'bn%s_branch2a' % name, 'scale%s_branch2a' % name)
+            b2 = tf.nn.relu(b2, name='relu')
 
-                resnet = conv_2d(resnet, out_channels, 1, 1, 'valid',
-                                 activation, bias, weights_init,
-                                 bias_init, regularizer, weight_decay,
-                                 trainable, restore)
-                if batch_norm:
-                    resnet = tflearn.batch_normalization(resnet)
+        with tf.variable_scope('branch2b'):
+            b2 = conv(b2, out_chans=out_chan1, shape=3, strides=1, name='res%s_branch2b' % name)
+            b2 = bn(b2,'bn%s_branch2b' % name, 'scale%s_branch2b' % name)
+            b2 = tf.nn.relu(b2, name='relu')
 
-                if downsample:
-                    # Use average pooling, because TensorFlow conv_2d can't
-                    # accept kernel size < strides.
-                    identity = avg_pool_2d(identity, downsample_strides,
-                                           downsample_strides)
+        with tf.variable_scope('branch2c'):
+            b2 = conv(b2, out_chans=out_chan2, shape=1, strides=1, name='res%s_branch2c' % name)
+            b2 = bn(b2,'bn%s_branch2c' % name, 'scale%s_branch2c' % name)
 
-                # Projection to new dimension
-                if in_channels != out_channels:
-                    in_channels = out_channels
-                    identity = conv_2d(identity, out_channels, 1, 1, 'valid',
-                                       'linear', bias, weights_init,
-                                       bias_init, regularizer, weight_decay,
-                                       trainable, restore)
-
-                resnet = resnet + identity
-                resnet = tflearn.activation(resnet, activation)
-
-    return resnet
-
-
-# def shallow_residual_block(incoming, nb_blocks, out_channels,
-#                            downsample=False, downsample_strides=2,
-#                            activation='relu', batch_norm=True, bias=False,
-#                            weights_init='uniform_scaling', bias_init='zeros',
-#                            regularizer=None, weight_decay=0.0001,
-#                            trainable=True, restore=True,
-#                            name="ShallowResidualBlock"):
-#     """ Shallow Residual Block.
-#     A shallow residual block as described in MSRA's Deep Residual Network
-#     paper.
-#     Notice: Because TensorFlow doesn't support a strides > filter size,
-#     an average pooling is used as a fix, but decrease performances.
-#     Input:
-#         4-D Tensor [batch, height, width, in_channels].
-#     Output:
-#         4-D Tensor [batch, new height, new width, nb_filter].
-#     Arguments:
-#         incoming: `Tensor`. Incoming 4-D Layer.
-#         nb_blocks: `int`. Number of layer blocks.
-#         out_channels: `int`. The number of convolutional filters of the
-#             convolution layers.
-#         downsample: `bool`. If True, apply downsampling using
-#             'downsample_strides' for strides.
-#         downsample_strides: `int`. The strides to use when downsampling.
-#         activation: `str` (name) or `Tensor`. Activation applied to this layer.
-#             (see tflearn.activations). Default: 'linear'.
-#         batch_norm: `bool`. If True, apply batch normalization.
-#         bias: `bool`. If True, a bias is used.
-#         weights_init: `str` (name) or `Tensor`. Weights initialization.
-#             (see tflearn.initializations) Default: 'uniform_scaling'.
-#         bias_init: `str` (name) or `tf.Tensor`. Bias initialization.
-#             (see tflearn.initializations) Default: 'zeros'.
-#         regularizer: `str` (name) or `Tensor`. Add a regularizer to this
-#             layer weights (see tflearn.regularizers). Default: None.
-#         weight_decay: `float`. Regularizer decay parameter. Default: 0.001.
-#         trainable: `bool`. If True, weights will be trainable.
-#         restore: `bool`. If True, this layer weights will be restored when
-#             loading a model
-#         name: A name for this layer (optional). Default: 'ShallowBottleneck'.
-#     References:
-#         Deep Residual Learning for Image Recognition. Kaiming He, Xiangyu
-#         Zhang, Shaoqing Ren, Jian Sun. 2015.
-#     Links:
-#         [http://arxiv.org/pdf/1512.03385v1.pdf]
-#         (http://arxiv.org/pdf/1512.03385v1.pdf)
-#     """
-#     resnet = incoming
-#     in_channels = incoming.get_shape().as_list()[-1]
-#
-#     with tf.name_scope(name):
-#         for i in range(nb_blocks):
-#             with tf.name_scope('ResidualBlock'):
-#
-#                 identity = resnet
-#
-#                 if downsample:
-#                     resnet = conv_2d(resnet, out_channels, 3,
-#                                      downsample_strides, 'same', 'linear',
-#                                      bias, weights_init, bias_init,
-#                                      regularizer, weight_decay, trainable,
-#                                      restore)
-#                 else:
-#                     resnet = conv_2d(resnet, out_channels, 3, 1, 'same',
-#                                      'linear', bias, weights_init,
-#                                      bias_init, regularizer, weight_decay,
-#                                      trainable, restore)
-#                 if batch_norm:
-#                     resnet = tflearn.batch_normalization(resnet)
-#                 resnet = tflearn.activation(resnet, activation)
-#
-#                 resnet = conv_2d(resnet, out_channels, 3, 1, 'same',
-#                                  'linear', bias, weights_init,
-#                                  bias_init, regularizer, weight_decay,
-#                                  trainable, restore)
-#                 if batch_norm:
-#                     resnet = tflearn.batch_normalization(resnet)
-#
-#                 # TensorFlow can't accept kernel size < strides, so using a
-#                 # average pooling or resizing for downsampling.
-#
-#                 # Downsampling
-#                 if downsample:
-#                     #identity = avg_pool_2d(identity, downsample_strides,
-#                     #                       downsample_strides)
-#                     size = resnet.get_shape().as_list()
-#                     identity = tf.image.resize_nearest_neighbor(identity,
-#                                                                 [size[1],
-#                                                                  size[2]])
-#
-#                 # Projection to new dimension
-#                 if in_channels != out_channels:
-#                     in_channels = out_channels
-#                     identity = conv_2d(identity, out_channels, 1, 1, 'same',
-#                                        'linear', bias, weights_init,
-#                                        bias_init, regularizer, weight_decay,
-#                                        trainable, restore)
-#
-#                 resnet = resnet + identity
-#                 resnet = tflearn.activation(resnet, activation)
-#
-#     return resnet
+        x = b1 + b2
+        return tf.nn.relu(x, name='relu')
