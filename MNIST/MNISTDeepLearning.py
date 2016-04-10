@@ -74,7 +74,7 @@ for i in xrange(20000):
 		train_accuracy = accuracy.eval(feed_dict = {x:batch[0], y_actual:batch[1], prob: 1.0})
 		print("step: %d, training accuracy: %g"%(i,train_accuracy))
 
-test_accuracy = accuracy.eval(feed_dict = {x:mnist.test.images, y_actual:mnist.test.labels, prob:1.0})
+test_accuracy = accuracy.eval(feed_dict={x: mnist.test.images, y_actual: mnist.test.labels, prob: 1.0})
 print("************* test accuracy: %g ************" % test_accuracy)
 
 
