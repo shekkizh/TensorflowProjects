@@ -114,10 +114,10 @@ def read_cifar10(sess, model_params, filename_queue):
     record_bytes = tf.decode_raw(value, tf.uint8)
 
     depth_major = tf.cast(tf.reshape(tf.slice(record_bytes, [label_bytes], [image_bytes]),
-                             [result.depth, result.height, result.width]), tf.float32)
+                                     [result.depth, result.height, result.width]), tf.float32)
 
-    result.image =  utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel'])
-    extended_image =tf.reshape(result.image, (1, result.height, result.width, result.depth))
+    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel'])
+    extended_image = tf.reshape(result.image, (1, result.height, result.width, result.depth))
     result.net = vgg_net(model_params["weights"], extended_image)
     result.content_features = sess.run(result.net[CONTENT_LAYER])
     return result
@@ -125,7 +125,7 @@ def read_cifar10(sess, model_params, filename_queue):
 
 def get_image(image_dir):
     image = scipy.misc.imread(image_dir)
-    image = np.ndarray.reshape(image.astype(np.float32), (((1,) + image.shape)))
+    image = np.ndarray.reshape(image.astype(np.float32), ((1,) + image.shape))
     return image
 
 
@@ -150,15 +150,15 @@ def inputs(sess, model_params):
 
 
 def inference(input_image):
-    W1 = utils.weight_variable([32, 32])
+    W1 = utils.weight_variable([3, 3, 3, 32])
     b1 = utils.bias_variable([32])
-    hconv_1 = tf.nn.relu(tf.matmul(input_image,W1) + b1)
+    hconv_1 = tf.nn.relu(utils.conv2d_basic(input_image, W1, b1))
     h_norm = utils.batch_norm(hconv_1)
-    bottleneck_1 = utils.bottleneck_unit(h_norm,16, 16,down_stride=True,name="res_1")
-    bottleneck_2 = utils.bottleneck_unit(bottleneck_1,8, 8, down_stride=True, name="res_2")
-    bottleneck_3 = utils.bottleneck_unit(bottleneck_2,16, 16,up_stride=True,name="res_3")
-    bottleneck_4 = utils.bottleneck_unit(bottleneck_3,32, 32, up_stride=True, name="res_4")
-    W5 = utils.weight_variable([32, 3])
+    bottleneck_1 = utils.bottleneck_unit(h_norm, 16, 16, down_stride=True, name="res_1")
+    bottleneck_2 = utils.bottleneck_unit(bottleneck_1, 8, 8, down_stride=True, name="res_2")
+    bottleneck_3 = utils.bottleneck_unit(bottleneck_2, 16, 16, up_stride=True, name="res_3")
+    bottleneck_4 = utils.bottleneck_unit(bottleneck_3, 32, 32, up_stride=True, name="res_4")
+    W5 = utils.weight_variable([3, 3, 32, 3])
     b5 = utils.bias_variable([3])
     out = tf.nn.tanh(utils.conv2d_basic(bottleneck_4, W5, b5))
     return out
