@@ -2,18 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="480f9289-d3f1-47c8-b257-a9954ccdc867" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/checkpoint" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/checkpoint" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-5000" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-5000" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-5000.meta" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-5000.meta" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-6000" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-6000" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-6000.meta" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-6000.meta" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-7000" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-7000" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-7000.meta" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-7000.meta" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-8000" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-8000" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-8000.meta" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-8000.meta" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-9000" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-9000" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/notMNIST_logs/notMNIST_logsmodel.ckpt-9000.meta" afterPath="$PROJECT_DIR$/logs/notMNIST_logs/run4/notMNIST_logsmodel.ckpt-9000.meta" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" afterPath="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/TensorflowUtils.py" afterPath="$PROJECT_DIR$/TensorflowUtils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/notMNIST/notMNIST.py" afterPath="$PROJECT_DIR$/notMNIST/notMNIST.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -40,7 +29,7 @@
         <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="69" column="25" selection-start-line="69" selection-start-column="25" selection-end-line="69" selection-end-column="25" />
+              <caret line="114" column="37" selection-start-line="114" selection-start-column="37" selection-end-line="114" selection-end-column="37" />
               <folding>
                 <element signature="e#66#89#0" expanded="true" />
               </folding>
@@ -48,11 +37,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="GenerativeNeuralStyle.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.1573604">
-              <caret line="152" column="43" selection-start-line="152" selection-start-column="43" selection-end-line="152" selection-end-column="43" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="127" column="64" selection-start-line="127" selection-start-column="64" selection-end-line="127" selection-end-column="64" />
               <folding>
                 <element signature="e#92#115#0" expanded="true" />
                 <element signature="e#1457#1579#0" expanded="false" />
@@ -62,11 +51,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="notMNIST.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="notMNIST.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/notMNIST/notMNIST.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="37" column="82" selection-start-line="37" selection-start-column="82" selection-end-line="37" selection-end-column="82" />
+            <state vertical-scroll-proportion="0.15816326">
+              <caret line="121" column="97" selection-start-line="121" selection-start-column="97" selection-end-line="121" selection-end-column="97" />
               <folding>
                 <element signature="e#23#43#0" expanded="true" />
               </folding>
@@ -106,10 +95,10 @@
         <option value="$PROJECT_DIR$/notMNIST/notMNISTBeginner.py" />
         <option value="$PROJECT_DIR$/notMNIST/notMNISTConv.py" />
         <option value="$PROJECT_DIR$/MNIST/MNISTDeepLearning.py" />
-        <option value="$PROJECT_DIR$/TensorflowUtils.py" />
         <option value="$PROJECT_DIR$/ImageArt/NeuralStyle.py" />
-        <option value="$PROJECT_DIR$/notMNIST/notMNIST.py" />
         <option value="$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py" />
+        <option value="$PROJECT_DIR$/TensorflowUtils.py" />
+        <option value="$PROJECT_DIR$/notMNIST/notMNIST.py" />
       </list>
     </option>
   </component>
@@ -410,7 +399,7 @@
     <frame x="0" y="23" width="1280" height="695" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30247933" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3034826" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -687,31 +676,31 @@
     <entry file="file://$PROJECT_DIR$/TensorflowUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="69" column="25" selection-start-line="69" selection-start-column="25" selection-end-line="69" selection-end-column="25" />
+          <caret line="114" column="37" selection-start-line="114" selection-start-column="37" selection-end-line="114" selection-end-column="37" />
           <folding>
             <element signature="e#66#89#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/notMNIST/notMNIST.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="37" column="82" selection-start-line="37" selection-start-column="82" selection-end-line="37" selection-end-column="82" />
-          <folding>
-            <element signature="e#23#43#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/ImageArt/GenerativeNeuralStyle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.1573604">
-          <caret line="152" column="43" selection-start-line="152" selection-start-column="43" selection-end-line="152" selection-end-column="43" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="127" column="64" selection-start-line="127" selection-start-column="64" selection-end-line="127" selection-end-column="64" />
           <folding>
             <element signature="e#92#115#0" expanded="true" />
             <element signature="e#1457#1579#0" expanded="false" />
             <element signature="e#1608#1835#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/notMNIST/notMNIST.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.15816326">
+          <caret line="121" column="97" selection-start-line="121" selection-start-column="97" selection-end-line="121" selection-end-column="97" />
+          <folding>
+            <element signature="e#23#43#0" expanded="true" />
           </folding>
         </state>
       </provider>
