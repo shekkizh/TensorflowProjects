@@ -150,7 +150,7 @@ def inputs(sess, model_params):
 
 
 def inference(input_image):
-    W1 = utils.weight_variable([32, 32])
+    W1 = utils.weight_variable([3, 3, 3, 32])
     b1 = utils.bias_variable([32])
     hconv_1 = tf.nn.relu(tf.matmul(input_image,W1) + b1)
     h_norm = utils.batch_norm(hconv_1)
@@ -158,7 +158,7 @@ def inference(input_image):
     bottleneck_2 = utils.bottleneck_unit(bottleneck_1,8, 8, down_stride=True, name="res_2")
     bottleneck_3 = utils.bottleneck_unit(bottleneck_2,16, 16,up_stride=True,name="res_3")
     bottleneck_4 = utils.bottleneck_unit(bottleneck_3,32, 32, up_stride=True, name="res_4")
-    W5 = utils.weight_variable([32, 3])
+    W5 = utils.weight_variable([3, 3, 32, 3])
     b5 = utils.bias_variable([3])
     out = tf.nn.tanh(utils.conv2d_basic(bottleneck_4, W5, b5))
     return out
