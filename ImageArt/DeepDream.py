@@ -166,7 +166,7 @@ def main(argv=None):
     mean = model_data['normalization'][0][0][0]
     model_params["mean_pixel"] = np.mean(mean, axis=(0, 1))
     model_params["weights"] = np.squeeze(model_data['layers'])
-    deepdream_image(model_params, dream_image)
+    deepdream_image(model_params, dream_image, no_of_octave=1)
 
 
 if __name__ == "__main__":
