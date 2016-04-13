@@ -29,6 +29,30 @@ def accuracy(logits, labels):
     return 100.0 * np.sum(np.argmax(logits, 1) == np.argmax(labels, 1)) / logits.shape[0]
 
 
+def inference_resnet(dataset):
+    dataset_reshaped = tf.reshape(dataset, [-1, 28, 28, 1])
+    with tf.name_scope("conv1") as scope:
+        W_conv1 = utils.weight_variable([5, 5, 1, 32], name="W_conv1")
+        bias1 = utils.bias_variable([32], name="bias1")
+        tf.histogram_summary("W_conv1", W_conv1)
+        tf.histogram_summary("bias1", bias1)
+        h_conv1 = tf.nn.relu(utils.conv2d_basic(dataset_reshaped, W_conv1, bias1))
+        h_norm1 = utils.batch_norm(h_conv1)
+
+    bottleneck_1 = utils.bottleneck_unit(h_norm1, 32, 32, down_stride=True, name="res1")
+    bottleneck_2 = utils.bottleneck_unit(bottleneck_1, 64, 64, down_stride=True, name="res2")
+
+    with tf.name_scope("fc1") as scope:
+        h_flat = tf.reshape(bottleneck_2, [-1, 7 * 7 * 64])
+        W_fc1 = utils.weight_variable([7 * 7 * 64, 10], name="W_fc1")
+        bias_fc1 = utils.bias_variable([10], name="bias_fc1")
+        tf.histogram_summary("W_fc1", W_fc1)
+        tf.histogram_summary("bias_fc1", bias_fc1)
+        logits = tf.matmul(h_flat, W_fc1) + bias_fc1
+
+    return logits
+
+
 def inference_conv(dataset):
     dataset_reshaped = tf.reshape(dataset, [-1, 28, 28, 1])
     with tf.name_scope("conv1") as scope:
@@ -95,6 +119,7 @@ def main(argv=None):
 
     # logits = inference_nn(dataset)
     logits = inference_conv(dataset)
+    # logits = inference_resnet(dataset) #resnet implementation is not supported by tensorflow :(
     loss = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(logits, labels))
     tf.scalar_summary("train_loss", loss)
@@ -142,6 +167,7 @@ def main(argv=None):
 
         test_pred = session.run(prediction, feed_dict={dataset: test_dataset})
         print("Test accuracy: %.1f%%" % accuracy(test_pred, test_labels))
+
 
 if __name__ == "__main__":
     tf.app.run()

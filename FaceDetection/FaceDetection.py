@@ -107,12 +107,20 @@ def main(argv=None):
 
             sess.run(train_op, feed_dict=feed_dict)
 
+<<<<<<< HEAD
             if step % 10 == 0:
+=======
+            if step % 100 == 0:
+>>>>>>> 58571329af3741516b325f32e3c4051fb2258edc
                 [err, summary_str] = sess.run([total_loss, summary_op], feed_dict=feed_dict)
                 print ("%s : Step:%d, Training loss: %f") % (datetime.now(), step, err)
                 summary_writer.add_summary(summary_str, global_step=step)
 
+<<<<<<< HEAD
             if step % 100 == 0:
+=======
+            if step % 1000 == 0:
+>>>>>>> 58571329af3741516b325f32e3c4051fb2258edc
                 valid_loss = sess.run(total_loss, feed_dict={dataset: validation_images, labels: validation_labels})
                 print ("======> Validation loss: %f" % valid_loss)
                 saver.save(sess, FLAGS.logs_dir, global_step=step)

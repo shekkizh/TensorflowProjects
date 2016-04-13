@@ -83,9 +83,9 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
         return tf.nn.conv2d_transpose(x, kernel, output_shape=out_shape, strides=[1, strides, strides, 1],
                                       padding='SAME', name='conv_transpose')
 
-    def conv(tensor, out_channel, shape, strides, name=None):
+    def conv(tensor, out_chans, shape, strides, name=None):
         in_channel = tensor.get_shape().as_list()[-1]
-        kernel = weight_variable([shape, shape, in_channel, out_channel], name=name)
+        kernel = weight_variable([shape, shape, in_channel, out_chans], name=name)
         return tf.nn.conv2d(x, kernel, strides=[1, strides, strides, 1], padding='SAME', name='conv')
 
     def bn(tensor, name=None):
