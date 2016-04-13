@@ -1,5 +1,5 @@
 __author__ = 'Charlie'
-# Attempt to learn alignment info given image and its reference
+# Layer visualization based on deep dream code in tensorflow for VGG net
 
 import tensorflow as tf
 import numpy as np
@@ -90,20 +90,13 @@ def vgg_net(weights, image):
     return net
 
 
-def main(argv=None):
-    utils.maybe_download_and_extract(FLAGS.model_dir, DATA_URL)
-    model_data = get_model_data()
-
-    mean = model_data['normalization'][0][0][0]
-    mean_pixel = np.mean(mean, axis=(0, 1))
-    image_shape = (1, 299, 299, 3)
-    weights = np.squeeze(model_data['layers'])
-
+def visualize_layer(model_params):
     # dummy_image = tf.Variable(processed_image)
+    image_shape = (1, 299, 299, 3)
     input_image = tf.placeholder(tf.float32, shape=image_shape)
     dummy_image = np.random.uniform(size=image_shape) + 100.0
     tf.histogram_summary("Image_Output", dummy_image)
-    image_net = vgg_net(weights, input_image)
+    image_net = vgg_net(model_params["weights"], input_image)
 
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
@@ -120,7 +113,17 @@ def main(argv=None):
 
         output = dummy_image.reshape(image_shape[1:])
         filename = "visualization_%s_%d.jpg" % (VISUALIZE_LAYER, VISUALIZE_FEATURE)
-        save_image(os.path.join(FLAGS.logs_dir, filename), output, mean_pixel)
+        save_image(os.path.join(FLAGS.logs_dir, filename), output, model_params["mean_pixel"])
+
+
+def main(argv=None):
+    utils.maybe_download_and_extract(FLAGS.model_dir, DATA_URL)
+    model_data = get_model_data()
+    model_params = {}
+    mean = model_data['normalization'][0][0][0]
+    model_params["mean_pixel"] = np.mean(mean, axis=(0, 1))
+    model_params["weights"] = np.squeeze(model_data['layers'])
+    visualize_layer(model_params)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 __author__ = 'Charlie'
-# Attempt to learn alignment info given image and its reference
+# Implementation to deep dream with VGG net
 
 import tensorflow as tf
 import numpy as np
@@ -8,7 +8,8 @@ import scipy.misc
 from datetime import datetime
 import os, sys, inspect
 
-utils_path = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
+utils_path = os.path.realpath(
+    os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
 if utils_path not in sys.path:
     sys.path.insert(0, utils_path)
 
@@ -17,13 +18,14 @@ import TensorflowUtils as utils
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("image_path", "", """Path to image to be dreamed""")
 tf.flags.DEFINE_string("model_dir", "Models_zoo/", """Path to the VGGNet model mat file""")
-tf.flags.DEFINE_string("log_dir", "logs/Deepdream_logs/", """Path to save logs and checkpoint if needed""")
+tf.flags.DEFINE_string("logs_dir", "logs/Deepdream_logs/", """Path to save logs and checkpoint if needed""")
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
-LEARNING_RATE = 1e-2
-MAX_ITERATIONS = 1000
-DREAM_LAYER = "relu5_4"
+LEARNING_RATE = 1.5
+MAX_ITERATIONS = 50
+DREAM_LAYER = "conv5_3"
+DREAM_FEATURE = 11
 
 
 def get_model_data():
@@ -37,8 +39,14 @@ def get_model_data():
 
 def get_image(image_dir):
     image = scipy.misc.imread(image_dir)
-    image = np.ndarray.reshape(image.astype(np.float32), (((1,) + image.shape)))
+    image = np.ndarray.reshape(image.astype(np.float32), ((1,) + image.shape))
     return image
+
+
+def save_image(filename, image, mean_pixel):
+    output = utils.unprocess_image(image, mean_pixel)
+    scipy.misc.imsave(filename, output)
+    print "Image saved!"
 
 
 def vgg_net(weights, image):
@@ -81,54 +89,45 @@ def vgg_net(weights, image):
     return net
 
 
+def deepdream_image(model_params, image):
+    filename = "%s_deepdream_%s.jpg" % os.path.splitext((FLAGS.image_path.split("/")[-1])[0],DREAM_LAYER)
+
+    processed_image = utils.process_image(image, model_params["mean_pixel"]).astype(np.float32)
+    input_image = tf.placeholder(tf.float32, processed_image.shape)
+    dream_net = vgg_net(model_params["weights"], input_image)
+    step = LEARNING_RATE
+
+    with tf.Session() as sess:
+        dream_layer_features = dream_net[DREAM_LAYER][:,:,:,DREAM_FEATURE]
+        feature_score = tf.reduce_mean(dream_layer_features)
+        grad_op = tf.gradients(feature_score, input_image)[0]
+
+        for itr in range(1, MAX_ITERATIONS):
+            grad, score = sess.run([grad_op, feature_score], feed_dict={input_image: processed_image})
+            grad /= np.abs(grad).mean() + 1e-8
+            processed_image += grad * step
+            if itr % 10 == 0 or itr == MAX_ITERATIONS:
+                step /= 2.0  # halfing step size every 10 iterations
+                temp_file = "%d_%s" % (itr, filename)
+                output = processed_image.reshape(image.shape[1:])
+                save_image(os.path.join(FLAGS.logs_dir, "checkpoints", temp_file), output, model_params["mean_pixel"])
+                print ("Step:%d Score:%f" % (itr, score))
+
+    output = processed_image.reshape(image.shape[1:])
+    save_image(os.path.join(FLAGS.logs_dir, filename), output, model_params["mean_pixel"])
+
+
 def main(argv=None):
     utils.maybe_download_and_extract(FLAGS.model_dir, DATA_URL)
     model_data = get_model_data()
     dream_image = get_image(FLAGS.image_path)
     print dream_image.shape
 
+    model_params = {}
     mean = model_data['normalization'][0][0][0]
-    mean_pixel = np.mean(mean, axis=(0, 1))
-
-    processed_image = utils.process_image(dream_image, mean_pixel)
-    weights = np.squeeze(model_data['layers'])
-
-    dummy_image = tf.Variable(processed_image)
-    tf.histogram_summary("Image_Output", dummy_image)
-    dream_net = vgg_net(weights, dummy_image)
-
-    with tf.Session() as sess:
-        dream_layer_features = dream_net[DREAM_LAYER]
-        max_value = tf.reduce_max(dream_layer_features)
-        dream_layer_features = tf.sub(max_value, dream_layer_features)
-        # loss = tf.sqrt(2 * tf.nn.l2_loss(dream_layer_features)) / utils.get_tensor_size(dream_layer_features)
-        # tf.scalar_summary("Loss", loss)
-
-        summary_op = tf.merge_all_summaries()
-        train_op = tf.train.AdamOptimizer(LEARNING_RATE).minimize(dream_layer_features)
-
-        best_loss = float('inf')
-        best = None
-        summary_writer = tf.train.SummaryWriter(FLAGS.log_dir)
-        sess.run(tf.initialize_all_variables())
-
-        for i in range(1, MAX_ITERATIONS):
-            train_op.run()
-
-            if i % 10 == 0 or i == MAX_ITERATIONS - 1:
-                this_loss = max_value.eval()
-                print('Step %d' % (i)),
-                print('    total loss: %g' % this_loss)
-                summary_writer.add_summary(summary_op.eval(), global_step=i)
-                if this_loss < best_loss:
-                    best_loss = this_loss
-                    best = dummy_image.eval()
-                    output = utils.unprocess_image(best.reshape(dream_image.shape[1:]), mean_pixel)
-                    scipy.misc.imsave("dream_check.jpg", output)
-
-    output = utils.unprocess_image(best.reshape(dream_image.shape[1:]), mean_pixel)
-    scipy.misc.imsave("output.jpg", output)
-
+    model_params["mean_pixel"] = np.mean(mean, axis=(0, 1))
+    model_params["weights"] = np.squeeze(model_data['layers'])
+    deepdream_image(model_params, dream_image)
 
 if __name__ == "__main__":
     tf.app.run()
