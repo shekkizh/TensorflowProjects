@@ -90,7 +90,7 @@ def vgg_net(weights, image):
 
 
 def deepdream_image(model_params, image):
-    filename = "%s_deepdream_%s.jpg" % os.path.splitext((FLAGS.image_path.split("/")[-1])[0],DREAM_LAYER)
+    filename = "%s_deepdream_%s.jpg" % (os.path.splitext((FLAGS.image_path.split("/")[-1]))[0], DREAM_LAYER)
 
     processed_image = utils.process_image(image, model_params["mean_pixel"]).astype(np.float32)
     input_image = tf.placeholder(tf.float32, processed_image.shape)
@@ -98,7 +98,7 @@ def deepdream_image(model_params, image):
     step = LEARNING_RATE
 
     with tf.Session() as sess:
-        dream_layer_features = dream_net[DREAM_LAYER][:,:,:,DREAM_FEATURE]
+        dream_layer_features = dream_net[DREAM_LAYER][:, :, :, DREAM_FEATURE]
         feature_score = tf.reduce_mean(dream_layer_features)
         grad_op = tf.gradients(feature_score, input_image)[0]
 
@@ -128,6 +128,7 @@ def main(argv=None):
     model_params["mean_pixel"] = np.mean(mean, axis=(0, 1))
     model_params["weights"] = np.squeeze(model_data['layers'])
     deepdream_image(model_params, dream_image)
+
 
 if __name__ == "__main__":
     tf.app.run()

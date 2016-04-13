@@ -2,17 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="480f9289-d3f1-47c8-b257-a9954ccdc867" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/dream_check.jpg" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run2/dream_check.jpg" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/events.out.tfevents.1459648579.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run2/events.out.tfevents.1459648579.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/events.out.tfevents.1459727611.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run2/events.out.tfevents.1459727611.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/events.out.tfevents.1459727802.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run2/events.out.tfevents.1459727802.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/events.out.tfevents.1459729064.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run2/events.out.tfevents.1459729064.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/prev_runs/events.out.tfevents.1459641020.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run1/events.out.tfevents.1459641020.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/prev_runs/events.out.tfevents.1459645391.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run1/events.out.tfevents.1459645391.Saraths-MacBook-Pro.local" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/prev_runs/events.out.tfevents.1459646785.Saraths-MacBook-Pro.local" afterPath="$PROJECT_DIR$/logs/Deepdream_logs/run1/events.out.tfevents.1459646785.Saraths-MacBook-Pro.local" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/checkpoints/10_deepdream_conv5_4.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/checkpoints/20_deepdream_conv5_4.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/checkpoints/30_deepdream_conv5_4.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/checkpoints/40_deepdream_conv5_4.jpg" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/logs/Deepdream_logs/deepdream_conv5_4.jpg" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageArt/DeepDream.py" afterPath="$PROJECT_DIR$/ImageArt/DeepDream.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/ImageArt/LayerVisualization.py" afterPath="$PROJECT_DIR$/ImageArt/LayerVisualization.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="TensorflowProjects.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -48,8 +43,8 @@
       <file leaf-file-name="DeepDream.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.73426574">
-              <caret line="100" column="73" selection-start-line="100" selection-start-column="73" selection-end-line="100" selection-end-column="73" />
+            <state vertical-scroll-proportion="0.125">
+              <caret line="92" column="40" selection-start-line="92" selection-start-column="40" selection-end-line="92" selection-end-column="40" />
               <folding>
                 <element signature="e#68#91#0" expanded="true" />
               </folding>
@@ -393,9 +388,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="695" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.4792703" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.5555556" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -792,8 +787,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ImageArt/DeepDream.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.73426574">
-          <caret line="100" column="73" selection-start-line="100" selection-start-column="73" selection-end-line="100" selection-end-column="73" />
+        <state vertical-scroll-proportion="0.125">
+          <caret line="92" column="40" selection-start-line="92" selection-start-column="40" selection-end-line="92" selection-end-column="40" />
           <folding>
             <element signature="e#68#91#0" expanded="true" />
           </folding>
