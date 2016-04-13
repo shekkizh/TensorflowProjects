@@ -23,7 +23,7 @@ tf.flags.DEFINE_string("log_dir", "logs/Neural_style_logs/", """Path to save log
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
-CONTENT_WEIGHT = 2e-3
+CONTENT_WEIGHT = 2e-4
 CONTENT_LAYERS = ('relu2_2',)
 
 STYLE_WEIGHT = 2e-1

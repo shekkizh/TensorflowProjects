@@ -1,0 +1,5 @@
+model_checkpoint_path: "FaceDetection_logs-300"
+all_model_checkpoint_paths: "FaceDetection_logs-0"
+all_model_checkpoint_paths: "FaceDetection_logs-100"
+all_model_checkpoint_paths: "FaceDetection_logs-200"
+all_model_checkpoint_paths: "FaceDetection_logs-300"
