@@ -127,8 +127,8 @@ def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
         feature_score = tf.reduce_mean(dream_layer_features)
         grad_op = tf.gradients(feature_score, input_image)[0]
 
+        dummy_image = processed_image.copy()
         for itr in xrange(5):
-            dummy_image = processed_image.copy()
             octaves = []
             for i in xrange(no_of_octave - 1):
                 hw = dummy_image.shape[1:3]
@@ -150,7 +150,7 @@ def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
             step /= 2.0  # halfing step size every itr
             feature += 2
             temp_file = "%d_%s" % (itr, filename)
-            print dummy_image.shape
+            # print dummy_image.shape
             output = dummy_image.reshape(processed_image.shape[1:])
             save_image(os.path.join(FLAGS.logs_dir, "checkpoints", temp_file), output, model_params["mean_pixel"])
 
