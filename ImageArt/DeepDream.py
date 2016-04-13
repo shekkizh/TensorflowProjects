@@ -23,9 +23,9 @@ tf.flags.DEFINE_string("logs_dir", "logs/Deepdream_logs/", """Path to save logs 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
 LEARNING_RATE = 1.5
-MAX_ITERATIONS = 50
-DREAM_LAYER = "conv5_3"
-DREAM_FEATURE = 11
+MAX_ITERATIONS = 10
+DREAM_LAYER = "conv5_1"
+DREAM_FEATURE = 0
 
 
 def get_model_data():
@@ -45,6 +45,7 @@ def get_image(image_dir):
 
 def save_image(filename, image, mean_pixel):
     output = utils.unprocess_image(image, mean_pixel)
+    output = np.uint8(np.clip(output, 0, 255))
     scipy.misc.imsave(filename, output)
     print "Image saved!"
 
@@ -89,38 +90,76 @@ def vgg_net(weights, image):
     return net
 
 
-def deepdream_image(model_params, image):
+def resize_image(image, size):
+    image_to_resize = image[0]
+    # print image_to_resize.shape
+    # print size
+    resized = scipy.misc.imresize(image_to_resize, size).astype(np.float32)
+    return np.expand_dims(resized, 0)
+
+
+def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
     filename = "%s_deepdream_%s.jpg" % (os.path.splitext((FLAGS.image_path.split("/")[-1]))[0], DREAM_LAYER)
 
     processed_image = utils.process_image(image, model_params["mean_pixel"]).astype(np.float32)
-    input_image = tf.placeholder(tf.float32, processed_image.shape)
+    input_image = tf.placeholder(tf.float32)
     dream_net = vgg_net(model_params["weights"], input_image)
-    step = LEARNING_RATE
 
+    def calc_grad_tiled(img, gradient, tile_size=512):
+        sz = tile_size
+        h, w = img.shape[1:3]
+        sx, sy = np.random.randint(sz, size=2)
+        img_shift = np.roll(np.roll(img, sx, 2), sy, 1)
+        gradient_val = np.zeros_like(img)
+        for y in xrange(0, max(h - sz // 2, sz), sz):
+            for x in xrange(0, max(w - sz // 2, sz), sz):
+                sub_img = img_shift[:, y:y + sz, x:x + sz]
+                # print sub_img.shape
+                g = sess.run(gradient, {input_image: sub_img})
+                gradient_val[:, y:y + sz, x:x + sz] = g
+
+        return np.roll(np.roll(gradient_val, -sx, 2), -sy, 1)
+
+    step = LEARNING_RATE
+    feature = DREAM_FEATURE
     with tf.Session() as sess:
-        dream_layer_features = dream_net[DREAM_LAYER][:, :, :, DREAM_FEATURE]
+        dream_layer_features = dream_net[DREAM_LAYER][:, :, :, feature]
         feature_score = tf.reduce_mean(dream_layer_features)
         grad_op = tf.gradients(feature_score, input_image)[0]
 
-        for itr in range(1, MAX_ITERATIONS):
-            grad, score = sess.run([grad_op, feature_score], feed_dict={input_image: processed_image})
-            grad /= np.abs(grad).mean() + 1e-8
-            processed_image += grad * step
-            if itr % 10 == 0 or itr == MAX_ITERATIONS:
-                step /= 2.0  # halfing step size every 10 iterations
-                temp_file = "%d_%s" % (itr, filename)
-                output = processed_image.reshape(image.shape[1:])
-                save_image(os.path.join(FLAGS.logs_dir, "checkpoints", temp_file), output, model_params["mean_pixel"])
-                print ("Step:%d Score:%f" % (itr, score))
+        for itr in xrange(5):
+            dummy_image = processed_image.copy()
+            octaves = []
+            for i in xrange(no_of_octave - 1):
+                hw = dummy_image.shape[1:3]
+                lo = resize_image(dummy_image, np.int32(np.float32(hw) / octave_scale))
+                hi = dummy_image - resize_image(dummy_image, hw)
+                dummy_image = lo
+                octaves.append(hi)
 
-    output = processed_image.reshape(image.shape[1:])
-    save_image(os.path.join(FLAGS.logs_dir, filename), output, model_params["mean_pixel"])
+            for octave in xrange(no_of_octave):
+                if octave > 0:
+                    hi = octaves[-octave]
+                    dummy_image = resize_image(dummy_image, hi.shape[1:3]) + hi
+                for i in xrange(MAX_ITERATIONS):
+                    grad = calc_grad_tiled(dummy_image, grad_op)
+                    dummy_image += grad * (step / (np.abs(grad).mean() + 1e-8))
+                    print '.',
+                print "."
+
+            step /= 2.0  # halfing step size every itr
+            feature += 2
+            temp_file = "%d_%s" % (itr, filename)
+            print dummy_image.shape
+            output = dummy_image.reshape(processed_image.shape[1:])
+            save_image(os.path.join(FLAGS.logs_dir, "checkpoints", temp_file), output, model_params["mean_pixel"])
 
 
 def main(argv=None):
     utils.maybe_download_and_extract(FLAGS.model_dir, DATA_URL)
     model_data = get_model_data()
     dream_image = get_image(FLAGS.image_path)
+    # dream_image = np.random.uniform(size=(1, 300, 300, 3)) + 100.0
     print dream_image.shape
 
     model_params = {}
