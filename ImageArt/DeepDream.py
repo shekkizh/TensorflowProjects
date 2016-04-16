@@ -25,7 +25,7 @@ DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep
 LEARNING_RATE = 1.5
 MAX_ITERATIONS = 10
 DREAM_LAYER = "conv5_1"
-DREAM_FEATURE = 0
+DREAM_FEATURE = 52
 
 
 def get_model_data():
@@ -127,7 +127,7 @@ def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
         feature_score = tf.reduce_mean(dream_layer_features)
         grad_op = tf.gradients(feature_score, input_image)[0]
 
-        dummy_image = processed_image.copy()
+        dummy_image = processed_image.copy()+100.0
         for itr in xrange(5):
             octaves = []
             for i in xrange(no_of_octave - 1):
@@ -148,10 +148,10 @@ def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
                 print "."
 
             step /= 2.0  # halfing step size every itr
-            feature += 2
+            feature += 15
             temp_file = "%d_%s" % (itr, filename)
             # print dummy_image.shape
-            output = dummy_image.reshape(processed_image.shape[1:])
+            output = dummy_image.reshape(processed_image.shape[1:]) - 100.0
             save_image(os.path.join(FLAGS.logs_dir, "checkpoints", temp_file), output, model_params["mean_pixel"])
 
 
