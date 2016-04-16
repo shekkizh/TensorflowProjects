@@ -12,11 +12,12 @@ if lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
 import TensorflowUtils as utils
-import readFaceDetectionData
+import FaceDetectionDataUtils
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("data_dir", "Data_zoo/FaceDetectionData/", "Path to data files")
 tf.flags.DEFINE_string("logs_dir", "logs/FaceDetection_logs", "Path to where log files are to be saved")
+tf.flags.DEFINE_string("mode", "train", "mode: train (Default)/ test")
 
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
@@ -74,7 +75,7 @@ def train(loss_val):
 
 
 def main(argv=None):
-    train_images, train_labels, validation_images, validation_labels, test_images = readFaceDetectionData.read_data(
+    train_images, train_labels, validation_images, validation_labels, test_images = FaceDetectionDataUtils.read_data(
         FLAGS.data_dir)
     print "Training Set: %s" % train_images.shape[0]
     print "Validation Set: %s" % validation_images.shape[0]
@@ -107,26 +108,18 @@ def main(argv=None):
 
             sess.run(train_op, feed_dict=feed_dict)
 
-<<<<<<< HEAD
             if step % 10 == 0:
-=======
-            if step % 100 == 0:
->>>>>>> 58571329af3741516b325f32e3c4051fb2258edc
                 [err, summary_str] = sess.run([total_loss, summary_op], feed_dict=feed_dict)
                 print ("%s : Step:%d, Training loss: %f") % (datetime.now(), step, err)
                 summary_writer.add_summary(summary_str, global_step=step)
 
-<<<<<<< HEAD
             if step % 100 == 0:
-=======
-            if step % 1000 == 0:
->>>>>>> 58571329af3741516b325f32e3c4051fb2258edc
                 valid_loss = sess.run(total_loss, feed_dict={dataset: validation_images, labels: validation_labels})
                 print ("======> Validation loss: %f" % valid_loss)
                 saver.save(sess, FLAGS.logs_dir, global_step=step)
 
 
 if __name__ == "__main__":
-    IMAGE_SIZE = readFaceDetectionData.IMAGE_SIZE
-    NUM_LABELS = readFaceDetectionData.NUM_LABELS
+    IMAGE_SIZE = FaceDetectionDataUtils.IMAGE_SIZE
+    NUM_LABELS = FaceDetectionDataUtils.NUM_LABELS
     tf.app.run()
