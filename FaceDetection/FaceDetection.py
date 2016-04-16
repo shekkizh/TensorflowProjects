@@ -16,12 +16,12 @@ import FaceDetectionDataUtils
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("data_dir", "Data_zoo/FaceDetectionData/", "Path to data files")
-tf.flags.DEFINE_string("logs_dir", "logs/FaceDetection_logs", "Path to where log files are to be saved")
+tf.flags.DEFINE_string("logs_dir", "logs/FaceDetection_logs/", "Path to where log files are to be saved")
 tf.flags.DEFINE_string("mode", "train", "mode: train (Default)/ test")
 
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
-MAX_ITERATIONS = 10000
+MAX_ITERATIONS = 1000
 
 
 def inference(dataset):
@@ -59,7 +59,7 @@ def inference(dataset):
         b_fc = utils.bias_variable([NUM_LABELS], name="b_fc")
         tf.histogram_summary("W_fc", W_fc)
         tf.histogram_summary("b_fc", b_fc)
-        pred = tf.matmul(h_flat, W_fc) + b_fc
+        pred = tf.nn.softmax(tf.matmul(h_flat, W_fc) + b_fc)
 
     return pred
 
@@ -101,23 +101,25 @@ def main(argv=None):
             saver.restore(sess, ckpt.model_checkpoint_path)
             print "Model restored from previous checkpoint!"
 
-        for step in range(MAX_ITERATIONS):
-            offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
-            feed_dict = {dataset: train_images[offset:offset + BATCH_SIZE],
-                         labels: train_labels[offset:offset + BATCH_SIZE]}
+        if FLAGS.mode == "train":
+            for step in range(MAX_ITERATIONS):
+                offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
+                feed_dict = {dataset: train_images[offset:offset + BATCH_SIZE],
+                             labels: train_labels[offset:offset + BATCH_SIZE]}
 
-            sess.run(train_op, feed_dict=feed_dict)
+                sess.run(train_op, feed_dict=feed_dict)
 
-            if step % 10 == 0:
-                [err, summary_str] = sess.run([total_loss, summary_op], feed_dict=feed_dict)
-                print ("%s : Step:%d, Training loss: %f") % (datetime.now(), step, err)
-                summary_writer.add_summary(summary_str, global_step=step)
+                if step % 10 == 0:
+                    [err, summary_str] = sess.run([total_loss, summary_op], feed_dict=feed_dict)
+                    print "%s : Step:%d, Training loss: %f" % (datetime.now(), step, err)
+                    summary_writer.add_summary(summary_str, global_step=step)
 
-            if step % 100 == 0:
-                valid_loss = sess.run(total_loss, feed_dict={dataset: validation_images, labels: validation_labels})
-                print ("======> Validation loss: %f" % valid_loss)
-                saver.save(sess, FLAGS.logs_dir, global_step=step)
-
+                if step % 100 == 0:
+                    valid_loss = sess.run(total_loss, feed_dict={dataset: validation_images, labels: validation_labels})
+                    print ("======> Validation loss: %f" % valid_loss)
+                    saver.save(sess, FLAGS.logs_dir, global_step=step)
+        test_labels = sess.run(logits, feed_dict={dataset:test_images})
+        FaceDetectionDataUtils.kaggle_submission_format(test_labels, FLAGS.data_dir)
 
 if __name__ == "__main__":
     IMAGE_SIZE = FaceDetectionDataUtils.IMAGE_SIZE

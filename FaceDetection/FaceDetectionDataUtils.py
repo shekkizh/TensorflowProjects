@@ -17,7 +17,7 @@ def read_data(data_dir, force=False):
         train_filename = os.path.join(data_dir, "training.csv")
         data_frame = pd.read_csv(train_filename)
         cols = data_frame.columns[:-1]
-        np.savetxt(os.path.join(data_dir, "column_labels.txt"))
+        np.savetxt(os.path.join(data_dir, "column_labels.txt"), cols.values, fmt="%s")
         data_frame['Image'] = data_frame['Image'].apply(lambda x: np.fromstring(x, sep=" ") / 255.0)
         data_frame = data_frame.dropna()
         print "Reading training.csv ..."
@@ -67,14 +67,15 @@ def read_data(data_dir, force=False):
     return train_images, train_labels, validation_images, validation_labels, test_images
 
 
-def make_submission(test_labels, data_dir):
+def kaggle_submission_format(test_labels, data_dir):
     test_labels *= 96.0
     test_labels = test_labels.clip(0, 96)
 
-    lookup_table = pd.read_csv("IdLookupTable.csv")
+    lookup_filename = os.path.join(data_dir, "IdLookupTable.csv")
+    lookup_table = pd.read_csv(lookup_filename)
     values = []
 
-    cols = np.genfromtxt(os.path.join(data_dir, "column_labels.txt"))
+    cols = np.genfromtxt(os.path.join(data_dir, "column_labels.txt"), dtype=str)
 
     for index, row in lookup_table.iterrows():
         values.append((
