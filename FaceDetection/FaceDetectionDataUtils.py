@@ -86,8 +86,8 @@ def kaggle_submission_format(test_images, test_labels, data_dir):
     test_labels *= IMAGE_LOCATION_NORM
     test_labels += IMAGE_LOCATION_NORM
     test_labels = test_labels.clip(0, 96)
-
     save_sample_result(test_images[0:16], test_labels[0:16], data_dir)
+
     lookup_filename = os.path.join(data_dir, "IdLookupTable.csv")
     lookup_table = pd.read_csv(lookup_filename)
     values = []

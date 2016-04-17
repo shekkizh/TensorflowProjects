@@ -116,7 +116,7 @@ def inference_simple(dataset):
         b_fc = utils.bias_variable([NUM_LABELS], name="b_fc")
         tf.histogram_summary("W_fc", W_fc)
         tf.histogram_summary("b_fc", b_fc)
-        pred = tf.matmul(h_flat, W_fc) + b_fc
+        pred = tf.nn.softmax(tf.matmul(h_flat, W_fc) + b_fc)
 
     return pred
 
@@ -193,6 +193,10 @@ def main(argv=None):
                 batch_data, batch_label = get_next_batch(step)
                 feed_dict = {dataset: batch_data,
                              labels: batch_label}
+            for step in range(MAX_ITERATIONS):
+                offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
+                feed_dict = {dataset: train_images[offset:offset + BATCH_SIZE],
+                             labels: train_labels[offset:offset + BATCH_SIZE]}
 
                 sess.run(train_op, feed_dict=feed_dict)
 
@@ -207,8 +211,7 @@ def main(argv=None):
                     saver.save(sess, FLAGS.logs_dir + 'model.ckpt', global_step=step)
         print "Predicting test result..."
         test_labels = sess.run(logits, feed_dict={dataset: test_images})
-        FaceDetectionDataUtils.kaggle_submission_format(validation_images, test_labels, FLAGS.data_dir)
-
+        FaceDetectionDataUtils.kaggle_submission_format(test_images, test_labels, FLAGS.data_dir)
 
 if __name__ == "__main__":
     IMAGE_SIZE = FaceDetectionDataUtils.IMAGE_SIZE
