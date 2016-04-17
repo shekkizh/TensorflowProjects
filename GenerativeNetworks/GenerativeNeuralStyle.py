@@ -10,7 +10,7 @@ from datetime import datetime
 import os, sys, inspect
 
 utils_path = os.path.realpath(
-    os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
+    os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..", "..")))
 if utils_path not in sys.path:
     sys.path.insert(0, utils_path)
 import TensorflowUtils as utils
@@ -153,7 +153,7 @@ def inference(input_image):
     W1 = utils.weight_variable([3, 3, 3, 32])
     b1 = utils.bias_variable([32])
     hconv_1 = tf.nn.relu(utils.conv2d_basic(input_image, W1, b1))
-    h_norm = utils.batch_norm(hconv_1)
+    h_norm = utils.local_response_norm(hconv_1)
     bottleneck_1 = utils.bottleneck_unit(h_norm, 16, 16, down_stride=True, name="res_1")
     bottleneck_2 = utils.bottleneck_unit(bottleneck_1, 8, 8, down_stride=True, name="res_2")
     bottleneck_3 = utils.bottleneck_unit(bottleneck_2, 16, 16, up_stride=True, name="res_3")

@@ -37,7 +37,7 @@ def inference_resnet(dataset):
         tf.histogram_summary("W_conv1", W_conv1)
         tf.histogram_summary("bias1", bias1)
         h_conv1 = tf.nn.relu(utils.conv2d_basic(dataset_reshaped, W_conv1, bias1))
-        h_norm1 = utils.batch_norm(h_conv1)
+        h_norm1 = utils.local_response_norm(h_conv1)
 
     bottleneck_1 = utils.bottleneck_unit(h_norm1, 32, 32, down_stride=True, name="res1")
     bottleneck_2 = utils.bottleneck_unit(bottleneck_1, 64, 64, down_stride=True, name="res2")
@@ -61,7 +61,7 @@ def inference_conv(dataset):
         tf.histogram_summary("W_conv1", W_conv1)
         tf.histogram_summary("bias1", bias1)
         h_conv1 = tf.nn.relu(utils.conv2d_basic(dataset_reshaped, W_conv1, bias1))
-        h_norm1 = utils.batch_norm(h_conv1)
+        h_norm1 = utils.local_response_norm(h_conv1)
         h_pool1 = utils.max_pool_2x2(h_norm1)
 
     with tf.name_scope("conv2") as scope:
@@ -70,7 +70,7 @@ def inference_conv(dataset):
         tf.histogram_summary("W_conv2", W_conv2)
         tf.histogram_summary("bias2", bias2)
         h_conv2 = tf.nn.relu(utils.conv2d_basic(h_pool1, W_conv2, bias2))
-        h_norm2 = utils.batch_norm(h_conv2)
+        h_norm2 = utils.local_response_norm(h_conv2)
         h_pool2 = utils.max_pool_2x2(h_norm2)
 
     with tf.name_scope("fc1") as scope:

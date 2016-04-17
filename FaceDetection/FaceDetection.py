@@ -32,7 +32,7 @@ def inference(dataset):
         tf.histogram_summary("W1", W1)
         tf.histogram_summary("b1", b1)
         h_conv1 = utils.conv2d_basic(dataset, W1, b1)
-        h_norm1 = utils.batch_norm(h_conv1)
+        h_norm1 = utils.local_response_norm(h_conv1)
         h_1 = tf.nn.relu(h_norm1, name="conv1")
         h_pool1 = utils.max_pool_2x2(h_1)
 
@@ -42,7 +42,7 @@ def inference(dataset):
         tf.histogram_summary("W2", W2)
         tf.histogram_summary("b2", b2)
         h_conv2 = utils.conv2d_basic(h_pool1, W2, b2)
-        h_norm2 = utils.batch_norm(h_conv2)
+        h_norm2 = utils.local_response_norm(h_conv2)
         h_2 = tf.nn.relu(h_norm2, name="conv2")
         h_pool2 = utils.max_pool_2x2(h_2)
 
@@ -52,7 +52,7 @@ def inference(dataset):
         tf.histogram_summary("W3", W3)
         tf.histogram_summary("b3", b3)
         h_conv3 = utils.conv2d_basic(h_pool2, W3, b3)
-        h_norm3 = utils.batch_norm(h_conv3)
+        h_norm3 = utils.local_response_norm(h_conv3)
         h_3 = tf.nn.relu(h_norm3, name="conv3")
         h_pool3 = utils.max_pool_2x2(h_3)
 
@@ -62,7 +62,7 @@ def inference(dataset):
         tf.histogram_summary("W4", W4)
         tf.histogram_summary("b4", b4)
         h_conv4 = utils.conv2d_basic(h_pool3, W4, b4)
-        h_norm4 = utils.batch_norm(h_conv4)
+        h_norm4 = utils.local_response_norm(h_conv4)
         h_4 = tf.nn.relu(h_norm4, name="conv4")
 
     with tf.name_scope("fc1") as scope:
