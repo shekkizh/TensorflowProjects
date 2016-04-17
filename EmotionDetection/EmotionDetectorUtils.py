@@ -29,7 +29,9 @@ def read_data(data_dir, force=False):
         print "Reading train.csv ..."
 
         train_images = np.vstack(data_frame['Pixels']).reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 1)
-        train_labels = np.array([map(create_onehot_label, data_frame['Emotion'].values)]).reshape(-1, 1, NUM_LABELS)
+        print train_images.shape
+        train_labels = np.array([map(create_onehot_label, data_frame['Emotion'].values)]).reshape(-1, NUM_LABELS)
+        print train_labels.shape
 
         permutations = np.random.permutation(train_images.shape[0])
         train_images = train_images[permutations]

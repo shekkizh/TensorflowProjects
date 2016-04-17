@@ -36,7 +36,7 @@ def inferece(dataset):
         b_conv2 = utils.bias_variable([64])
         tf.histogram_summary("W_conv2", W_conv2)
         tf.histogram_summary("b_conv2", b_conv2)
-        h_conv2 = utils.conv2d_basic(dataset, W_conv1, b_conv1)
+        h_conv2 = utils.conv2d_basic(h_pool1, W_conv2, b_conv2)
         h_2 = tf.nn.relu(h_conv2)
         h_pool2 = utils.max_pool_2x2(h_2)
 
@@ -54,13 +54,13 @@ def inferece(dataset):
         b_fc2 = utils.bias_variable([NUM_LABELS])
         tf.histogram_summary("W_fc2", W_fc2)
         tf.histogram_summary("b_fc2", b_fc2)
-        pred = tf.nn.softmax(tf.matmul(h_fc1, W_fc2) + b_fc2)
+        pred = tf.matmul(h_fc1, W_fc2) + b_fc2
 
     return pred
 
 
 def loss(pred, label):
-    cross_entropy_loss = tf.reduce_mean(-tf.reduce_sum(label * tf.log(pred)))
+    cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, label))
     tf.scalar_summary('Entropy', cross_entropy_loss)
     return cross_entropy_loss
 
@@ -73,7 +73,6 @@ def get_next_batch(images, labels, step):
     offset = (step * BATCH_SIZE) % (images.shape[0] - BATCH_SIZE)
     batch_images = images[offset: offset + BATCH_SIZE]
     batch_labels = labels[offset:offset + BATCH_SIZE]
-    print batch_images.shape, batch_labels.shape
     return batch_images, batch_labels
 
 
@@ -85,8 +84,9 @@ def main(argv=None):
 
     global_step = tf.Variable(0, trainable=False)
     input_dataset = tf.placeholder(tf.float32, [None, IMAGE_SIZE, IMAGE_SIZE, 1])
-    input_labels = tf.placeholder(tf.float32, [None, 1, NUM_LABELS])
+    input_labels = tf.placeholder(tf.float32, [None, NUM_LABELS])
     pred = inferece(input_dataset)
+    output_pred = tf.nn.softmax(pred)
     loss_val = loss(pred, input_labels)
     train_op = train(loss_val, global_step)
 
