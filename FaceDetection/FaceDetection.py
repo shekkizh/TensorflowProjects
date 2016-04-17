@@ -160,11 +160,7 @@ def main(argv=None):
     print "Test Set: %s" % test_images.shape[0]
 
     def get_next_batch(step):
-<<<<<<< HEAD
-        offset = (1 * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
-=======
         offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
         data = train_images[offset:offset + BATCH_SIZE]
         label = train_labels[offset:offset + BATCH_SIZE]
         return data, label
@@ -192,14 +188,7 @@ def main(argv=None):
 
         if FLAGS.mode == "train":
             print "Training..."
-<<<<<<< HEAD
-=======
-            for step in range(MAX_ITERATIONS):
 
-                batch_data, batch_label = get_next_batch(step)
-                feed_dict = {dataset: batch_data,
-                             labels: batch_label}
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
             for step in range(MAX_ITERATIONS):
 
                 batch_data, batch_label = get_next_batch(step)
@@ -219,12 +208,7 @@ def main(argv=None):
                     saver.save(sess, FLAGS.logs_dir + 'model.ckpt', global_step=step)
         print "Predicting test result..."
         test_labels = sess.run(logits, feed_dict={dataset: test_images})
-<<<<<<< HEAD
-        FaceDetectionDataUtils.kaggle_submission_format(validation_images, test_labels, FLAGS.data_dir)
-
-=======
         FaceDetectionDataUtils.kaggle_submission_format(test_images, test_labels, FLAGS.data_dir)
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
 
 if __name__ == "__main__":
     IMAGE_SIZE = FaceDetectionDataUtils.IMAGE_SIZE
