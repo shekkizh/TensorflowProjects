@@ -101,18 +101,10 @@ def inference_simple(dataset):
         h_conv2 = tf.nn.relu(utils.conv2d_basic(h_pool1, W2, b2), name="h_conv2")
         h_pool2 = utils.max_pool_2x2(h_conv2)
 
-    with tf.name_scope("conv3") as scope:
-        W3 = utils.weight_variable([3, 3, 64, 128], name='W3')
-        b3 = utils.bias_variable([128], name='b3')
-        tf.histogram_summary("W3", W3)
-        tf.histogram_summary("b3", b3)
-        h_conv3 = tf.nn.relu(utils.conv2d_basic(h_pool2, W3, b3), name="h_conv3")
-        h_pool3 = utils.max_pool_2x2(h_conv3)
-
     with tf.name_scope("fc") as scope:
-        image_size = IMAGE_SIZE // 8
-        h_flat = tf.reshape(h_pool3, [-1, image_size * image_size * 128])
-        W_fc = utils.weight_variable([image_size * image_size * 128, NUM_LABELS], name="W_fc")
+        image_size = IMAGE_SIZE // 4
+        h_flat = tf.reshape(h_pool2, [-1, image_size * image_size * 64])
+        W_fc = utils.weight_variable([image_size * image_size * 64, NUM_LABELS], name="W_fc")
         b_fc = utils.bias_variable([NUM_LABELS], name="b_fc")
         tf.histogram_summary("W_fc", W_fc)
         tf.histogram_summary("b_fc", b_fc)
@@ -130,7 +122,7 @@ def loss(pred, labels):
 def train(loss_val, step):
     learning_rate = tf.train.exponential_decay(LEARNING_RATE, step, MAX_ITERATIONS / 4, 0.95,
                                                staircase=True)
-    return tf.train.AdamOptimizer(learning_rate).minimize(loss_val)
+    return tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss_val)
 
 
 def augment_data(data, label):
@@ -160,11 +152,7 @@ def main(argv=None):
     print "Test Set: %s" % test_images.shape[0]
 
     def get_next_batch(step):
-<<<<<<< HEAD
-        offset = (1 * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
-=======
         offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
         data = train_images[offset:offset + BATCH_SIZE]
         label = train_labels[offset:offset + BATCH_SIZE]
         return data, label
@@ -172,7 +160,7 @@ def main(argv=None):
     global_step = tf.Variable(0.0, trainable=False)
     dataset = tf.placeholder(tf.float32, [None, IMAGE_SIZE, IMAGE_SIZE, 1])
     labels = tf.placeholder(tf.float32, [None, NUM_LABELS])
-    logits = inference_simple(dataset)
+    logits = inference(dataset)
     total_loss = loss(logits, labels)
     train_op = train(total_loss, global_step)
 
@@ -192,14 +180,7 @@ def main(argv=None):
 
         if FLAGS.mode == "train":
             print "Training..."
-<<<<<<< HEAD
-=======
-            for step in range(MAX_ITERATIONS):
 
-                batch_data, batch_label = get_next_batch(step)
-                feed_dict = {dataset: batch_data,
-                             labels: batch_label}
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
             for step in range(MAX_ITERATIONS):
 
                 batch_data, batch_label = get_next_batch(step)
@@ -219,12 +200,7 @@ def main(argv=None):
                     saver.save(sess, FLAGS.logs_dir + 'model.ckpt', global_step=step)
         print "Predicting test result..."
         test_labels = sess.run(logits, feed_dict={dataset: test_images})
-<<<<<<< HEAD
-        FaceDetectionDataUtils.kaggle_submission_format(validation_images, test_labels, FLAGS.data_dir)
-
-=======
         FaceDetectionDataUtils.kaggle_submission_format(test_images, test_labels, FLAGS.data_dir)
->>>>>>> bf88112015cf69e3f791b7b8d80c52fc7ce62c76
 
 if __name__ == "__main__":
     IMAGE_SIZE = FaceDetectionDataUtils.IMAGE_SIZE
