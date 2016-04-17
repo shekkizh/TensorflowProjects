@@ -62,9 +62,8 @@ def avg_pool_2x2(x):
     return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
 
-def batch_norm(x):
+def local_response_norm(x):
     return tf.nn.lrn(x, depth_radius=5, bias=2, alpha=1e-4, beta=0.75)
-
 
 def process_image(image, mean_pixel):
     return image - mean_pixel
