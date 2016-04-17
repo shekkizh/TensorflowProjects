@@ -54,6 +54,16 @@ def conv2d_basic(x, W, bias):
     return tf.nn.bias_add(conv, bias)
 
 
+def conv2d_strided(x, W, b):
+    conv = tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding="SAME")
+    return tf.nn.bias_add(conv, b)
+
+
+def conv2d_transpose_strided(x, W, b):
+    conv = tf.nn.conv2d_transpose(x, W, strides=[1, 2, 2, 1], padding="SAME")
+    return tf.nn.bias_add(conv, b)
+
+
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
@@ -65,6 +75,7 @@ def avg_pool_2x2(x):
 def local_response_norm(x):
     return tf.nn.lrn(x, depth_radius=5, bias=2, alpha=1e-4, beta=0.75)
 
+
 def process_image(image, mean_pixel):
     return image - mean_pixel
 
@@ -74,6 +85,9 @@ def unprocess_image(image, mean_pixel):
 
 
 def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False, name=None):
+    """
+    Modified implementation from github ry?!
+    """
     def conv_transpose(tensor, out_channel, shape, strides, name=None):
         out_shape = tensor.get_shape().as_list()
         in_channel = out_shape[-1]
