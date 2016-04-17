@@ -25,12 +25,11 @@ def read_data(data_dir, force=False):
         train_filename = os.path.join(data_dir, "train.csv")
         data_frame = pd.read_csv(train_filename)
         data_frame['Pixels'] = data_frame['Pixels'].apply(lambda x: np.fromstring(x, sep=" ") / 255.0)
-        data_frame['Emotions'] = data_frame['Emotions'].apply(lambda x: create_onehot_label(x))
         data_frame = data_frame.dropna()
         print "Reading train.csv ..."
 
         train_images = np.vstack(data_frame['Pixels']).reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 1)
-        train_labels = data_frame['Emotions'].values
+        train_labels = np.array([map(create_onehot_label, data_frame['Emotion'].values)]).reshape(-1, 1, NUM_LABELS)
 
         permutations = np.random.permutation(train_images.shape[0])
         train_images = train_images[permutations]
@@ -46,7 +45,7 @@ def read_data(data_dir, force=False):
         data_frame = pd.read_csv(test_filename)
         data_frame['Pixels'] = data_frame['Pixels'].apply(lambda x: np.fromstring(x, sep=" ") / 255.0)
         data_frame = data_frame.dropna()
-        test_images = np.vstack(data_frame['Image']).reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 1)
+        test_images = np.vstack(data_frame['Pixels']).reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 1)
 
         with open(pickle_file, "wb") as file:
             try:
