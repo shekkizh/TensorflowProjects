@@ -18,10 +18,16 @@ tf.flags.DEFINE_string("mode", "train", "mode: train (Default)/ test")
 
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
-MAX_ITERATIONS = 10001
+MAX_ITERATIONS = 1001
+REGULARIZATION = 1e-7
 
 
-def inferece(dataset):
+def add_to_regularization_loss(W, b):
+    tf.add_to_collection("losses", tf.nn.l2_loss(W))
+    tf.add_to_collection("losses", tf.nn.l2_loss(b))
+
+
+def inferece(dataset, prob):
     with tf.name_scope("conv1") as scope:
         W_conv1 = utils.weight_variable([5, 5, 1, 32])
         b_conv1 = utils.bias_variable([32])
@@ -30,6 +36,7 @@ def inferece(dataset):
         h_conv1 = utils.conv2d_basic(dataset, W_conv1, b_conv1)
         h_1 = tf.nn.relu(h_conv1)
         h_pool1 = utils.max_pool_2x2(h_1)
+        add_to_regularization_loss(W_conv1, b_conv1)
 
     with tf.name_scope("conv2") as scope:
         W_conv2 = utils.weight_variable([3, 3, 32, 64])
@@ -39,6 +46,7 @@ def inferece(dataset):
         h_conv2 = utils.conv2d_basic(h_pool1, W_conv2, b_conv2)
         h_2 = tf.nn.relu(h_conv2)
         h_pool2 = utils.max_pool_2x2(h_2)
+        add_to_regularization_loss(W_conv2, b_conv2)
 
     with tf.name_scope("fc_1") as scope:
         image_size = IMAGE_SIZE / 4
@@ -48,7 +56,7 @@ def inferece(dataset):
         tf.histogram_summary("W_fc1", W_fc1)
         tf.histogram_summary("b_fc1", b_fc1)
         h_fc1 = tf.nn.relu(tf.matmul(h_flat, W_fc1) + b_fc1)
-
+        h_fc1_dropout = tf.nn.dropout(h_fc1, prob)
     with tf.name_scope("fc_2") as scope:
         W_fc2 = utils.weight_variable([256, NUM_LABELS])
         b_fc2 = utils.bias_variable([NUM_LABELS])
@@ -62,7 +70,9 @@ def inferece(dataset):
 def loss(pred, label):
     cross_entropy_loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(pred, label))
     tf.scalar_summary('Entropy', cross_entropy_loss)
-    return cross_entropy_loss
+    reg_losses = tf.add_n(tf.get_collection("losses"))
+    tf.scalar_summary('Reg_loss', reg_losses)
+    return cross_entropy_loss + REGULARIZATION * reg_losses
 
 
 def train(loss, step):
@@ -83,9 +93,11 @@ def main(argv=None):
     print "Test size: %s" % test_images.shape[0]
 
     global_step = tf.Variable(0, trainable=False)
+    dropout_prob = tf.placeholder(tf.float32)
     input_dataset = tf.placeholder(tf.float32, [None, IMAGE_SIZE, IMAGE_SIZE, 1])
     input_labels = tf.placeholder(tf.float32, [None, NUM_LABELS])
-    pred = inferece(input_dataset)
+
+    pred = inferece(input_dataset, dropout_prob)
     output_pred = tf.nn.softmax(pred)
     loss_val = loss(pred, input_labels)
     train_op = train(loss_val, global_step)
@@ -102,7 +114,7 @@ def main(argv=None):
 
         for step in xrange(MAX_ITERATIONS):
             batch_image, batch_label = get_next_batch(train_images, train_labels, step)
-            feed_dict = {input_dataset: batch_image, input_labels: batch_label}
+            feed_dict = {input_dataset: batch_image, input_labels: batch_label, dropout_prob: 0.5}
 
             sess.run(train_op, feed_dict=feed_dict)
             if step % 10 == 0:
@@ -111,7 +123,8 @@ def main(argv=None):
                 print "Training Loss: %f" % train_loss
 
             if step % 100 == 0:
-                valid_loss = sess.run(loss_val, feed_dict={input_dataset: valid_images, input_labels: valid_labels})
+                valid_loss = sess.run(loss_val, feed_dict={input_dataset: valid_images, input_labels: valid_labels,
+                                                           dropout_prob: 0})
                 print "%s Validation Loss: %f" % (datetime.now(), valid_loss)
                 saver.save(sess, FLAGS.logs_dir + 'model.ckpt', global_step=step)
 
