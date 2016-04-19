@@ -19,7 +19,7 @@ tf.flags.DEFINE_string("mode", "train", "mode: train (Default)/ test")
 BATCH_SIZE = 128
 LEARNING_RATE = 1e-3
 MAX_ITERATIONS = 1001
-REGULARIZATION = 1e-7
+REGULARIZATION = 1e-2
 
 
 def add_to_regularization_loss(W, b):

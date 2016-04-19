@@ -15,3 +15,5 @@ Data_zoo/FaceDetectionData
 Data_zoo/Yahoo_Shoe_Data/
 Data_zoo/EmotionDetector/
 Data_zoo/TU_Graz_Data/
+logs/EmotionDetector_logs/
+logs/FaceDetection_logs/

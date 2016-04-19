@@ -10,7 +10,7 @@ from datetime import datetime
 import os, sys, inspect
 
 utils_path = os.path.realpath(
-    os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..", "..")))
+    os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
 if utils_path not in sys.path:
     sys.path.insert(0, utils_path)
 import TensorflowUtils as utils
@@ -21,6 +21,7 @@ tf.flags.DEFINE_string("data_dir", "Data_zoo/CIFAR10_data/", """Path to the CIFA
 tf.flags.DEFINE_string("style_path", "", """Path to style image to use""")
 tf.flags.DEFINE_string("mode", "train", "Network mode train/ test")
 tf.flags.DEFINE_string("test_image_path", "", "Path to test image - read only if mode is test")
+tf.flags.DEFINE_integer("batch_size", "64", "Batch size for training")
 
 tf.flags.DEFINE_string("log_dir", "logs/GenerativeNeural_style/", """Path to save logs and checkpoint if needed""")
 
@@ -44,11 +45,6 @@ NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 20000
 IMAGE_SIZE = 32
 
 
-def activation_summary(x):
-    tf.histogram_summary(x.op.name + '/activations', x)
-    tf.scalar_summary(x.op.name + '/sparsity', tf.nn.zero_fraction(x))
-
-
 def get_model_data():
     filename = MODEL_URL.split("/")[-1]
     filepath = os.path.join(FLAGS.model_dir, filename)
@@ -65,7 +61,7 @@ def vgg_net(weights, image):
         'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2',
 
         'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
-        'relu3_3',  # 'conv3_4', 'relu3_4', 'pool3',
+        'relu3_3'  # 'conv3_4', 'relu3_4', 'pool3',
 
         # 'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
         # 'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
@@ -95,12 +91,7 @@ def vgg_net(weights, image):
     return net
 
 
-count = 0
-
-
-def read_cifar10(sess, model_params, filename_queue):
-    global count
-
+def read_cifar10(model_params, filename_queue):
     class CIFAR10Record(object):
         pass
 
@@ -123,8 +114,10 @@ def read_cifar10(sess, model_params, filename_queue):
 
     result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel']) / 255.0
     extended_image = 255 * tf.reshape(result.image, (1, result.height, result.width, result.depth))
+
     result.net = vgg_net(model_params["weights"], extended_image)
-    result.content_features = sess.run(result.net[CONTENT_LAYER])
+    content_feature = result.net[CONTENT_LAYER]
+    result.content_features = content_feature
     return result
 
 
@@ -134,18 +127,19 @@ def get_image(image_dir):
     return image
 
 
-def inputs(sess, model_params):
-    data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
-    filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
+def read_input(model_params):
+    data_directory = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
+    filenames = [os.path.join(data_directory, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
     for f in filenames:
         if not tf.gfile.Exists(f):
             raise ValueError('Failed to find file: ' + f)
 
     filename_queue = tf.train.string_input_producer(filenames)
-
-    read_input = read_cifar10(sess, model_params, filename_queue)
-    num_preprocess_threads = 16
+    print "Reading cifar10 data"
+    read_input = read_cifar10(model_params, filename_queue)
+    num_preprocess_threads = 8
     min_queue_examples = int(0.4 * NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN)
+    print "Shuffling train batch"
     input_images, input_content_features = tf.train.shuffle_batch([read_input.image, read_input.content_features],
                                                                   batch_size=FLAGS.batch_size,
                                                                   num_threads=num_preprocess_threads,
@@ -189,13 +183,15 @@ def inference_strided(input_image):
     h_conv3 = tf.nn.relu(utils.conv2d_strided(h_conv2, W3, b3))
 
     # upstrides
-    W4 = utils.weight_variable([3, 3, 128, 64])
+    W4 = utils.weight_variable([3, 3, 64, 128])
     b4 = utils.bias_variable([64])
     tf.histogram_summary("W4", W4)
     tf.histogram_summary("b4", b4)
+    # print h_conv3.get_shape()
+    # print W4.get_shape()
     h_conv4 = tf.nn.relu(utils.conv2d_transpose_strided(h_conv3, W4, b4))
 
-    W5 = utils.weight_variable([3, 3, 64, 32])
+    W5 = utils.weight_variable([3, 3, 32, 64])
     b5 = utils.bias_variable([32])
     tf.histogram_summary("W5", W5)
     tf.histogram_summary("b5", b5)
@@ -245,18 +241,19 @@ def main(argv=None):
             style_features[layer] = style_gram
 
         print "Reading image inputs"
-        input_image, input_content = inputs(sess, model_params)
+        input_image, input_content = read_input(model_params)
 
         print "Setting up inference"
         output_image = 255 * inference_strided(input_image)
 
-        print "Calculating various losses"
+        print "Calculating content loss..."
         image_net = vgg_net(model_params['weights'], output_image)
-        content_loss = CONTENT_WEIGHT * tf.nn.l2_loss(image_net[layer] - input_content) / utils.get_tensor_size(
+        content_loss = CONTENT_WEIGHT * tf.nn.l2_loss(image_net[CONTENT_LAYER] - input_content) / utils.get_tensor_size(
             input_content)
-
+        print content_loss.get_shape()
         tf.scalar_summary("Content_loss", content_loss)
 
+        print "Calculating style loss..."
         style_losses = []
         for layer in STYLE_LAYERS:
             image_layer = image_net[layer]
@@ -265,9 +262,12 @@ def main(argv=None):
             feats = tf.reshape(image_layer, (-1, number))
             image_gram = tf.matmul(tf.transpose(feats), feats) / size
             style_losses.append(0.5 * tf.nn.l2_loss(image_gram - style_features[layer]))
+
         style_loss = STYLE_WEIGHT * reduce(tf.add, style_losses)
+        print style_loss.get_shape()
         tf.scalar_summary("Style_loss", style_loss)
 
+        print "Calculating variational loss..."
         tv_y_size = utils.get_tensor_size(output_image[:, 1:, :, :])
         tv_x_size = utils.get_tensor_size(output_image[:, :, 1:, :])
         tv_loss = VARIATION_WEIGHT * (
@@ -275,41 +275,48 @@ def main(argv=None):
              tv_y_size) +
             (tf.nn.l2_loss(output_image[:, :, 1:, :] - output_image[:, :, :IMAGE_SIZE - 1, :]) /
              tv_x_size))
+        print tv_loss.get_shape()
         tf.scalar_summary("Variation_loss", tv_loss)
 
         loss = content_loss + style_loss + tv_loss
         tf.scalar_summary("Total_loss", loss)
-
+	print "Setting up train operation..."
         train_step = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
-
+	
+	print "Setting up summary write"
         summary_writer = tf.train.SummaryWriter(FLAGS.log_dir, sess.graph_def)
         summary_op = tf.merge_all_summaries()
-
+	
+	print "initializing all variables"
         sess.run(tf.initialize_all_variables())
-
+	
+	print "Creating saver.."
         saver = tf.train.Saver()
         ckpt = tf.train.get_checkpoint_state(FLAGS.log_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
-
+	    print "Model restored..."
+	
         if FLAGS.mode == "test":
             test(sess, model_params['mean_pixel'])
             return
-
+	
+	print "Running training..."
         for step in range(0, MAX_ITERATIONS):
-            train_step.run()
+            sess.run(train_step)
 
-            if step % 100 == 0:
+            if step % 10 == 0:
                 this_loss, summary_str = sess.run([loss, summary_op])
                 summary_writer.add_summary(summary_str, global_step=step)
 
                 print('%s : Step %d' % (datetime.now(), step)),
-                print('    total loss: %g' % this_loss)
+                print('total loss: %g' % this_loss)
 
-            if step % 1000 == 0:
-                print('content loss: %g' % content_loss.eval()),
-                print('  style loss: %g' % style_loss.eval()),
-                print('     tv loss: %g' % tv_loss.eval())
+            if step % 100 == 0:
+                print ("Step %d" % step),
+                print(' content loss: %g' % content_loss.eval()),
+                print(' style loss: %g' % style_loss.eval()),
+                print(' tv loss: %g' % tv_loss.eval())
                 saver.save(sess, FLAGS.log_dir + "model.ckpt", global_step=step)
 
 
