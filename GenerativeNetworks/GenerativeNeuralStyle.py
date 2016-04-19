@@ -34,10 +34,10 @@ CONTENT_LAYER = 'relu2_2'
 STYLE_WEIGHT = 2e-1
 STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3')
 
-VARIATION_WEIGHT = 1e-4
+VARIATION_WEIGHT = 1e-3
 
 LEARNING_RATE = 1e-3
-MAX_ITERATIONS = 30000
+MAX_ITERATIONS = 90001
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 20000
 
@@ -65,7 +65,7 @@ def vgg_net(weights, image):
         'conv2_1', 'relu2_1', 'conv2_2', 'relu2_2', 'pool2',
 
         'conv3_1', 'relu3_1', 'conv3_2', 'relu3_2', 'conv3_3',
-        'relu3_3', 'conv3_4', 'relu3_4', 'pool3',
+        'relu3_3',  # 'conv3_4', 'relu3_4', 'pool3',
 
         # 'conv4_1', 'relu4_1', 'conv4_2', 'relu4_2', 'conv4_3',
         # 'relu4_3', 'conv4_4', 'relu4_4', 'pool4',
@@ -95,7 +95,12 @@ def vgg_net(weights, image):
     return net
 
 
+count = 0
+
+
 def read_cifar10(sess, model_params, filename_queue):
+    global count
+
     class CIFAR10Record(object):
         pass
 
@@ -116,8 +121,8 @@ def read_cifar10(sess, model_params, filename_queue):
     depth_major = tf.cast(tf.reshape(tf.slice(record_bytes, [label_bytes], [image_bytes]),
                                      [result.depth, result.height, result.width]), tf.float32)
 
-    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel'])
-    extended_image = tf.reshape(result.image, (1, result.height, result.width, result.depth))
+    result.image = utils.process_image(tf.transpose(depth_major, [1, 2, 0]), model_params['mean_pixel']) / 255.0
+    extended_image = 255 * tf.reshape(result.image, (1, result.height, result.width, result.depth))
     result.net = vgg_net(model_params["weights"], extended_image)
     result.content_features = sess.run(result.net[CONTENT_LAYER])
     return result
@@ -149,7 +154,7 @@ def inputs(sess, model_params):
     return input_images, input_content_features
 
 
-def inference(input_image):
+def inference_res(input_image):
     W1 = utils.weight_variable([3, 3, 3, 32])
     b1 = utils.bias_variable([32])
     hconv_1 = tf.nn.relu(utils.conv2d_basic(input_image, W1, b1))
@@ -164,11 +169,52 @@ def inference(input_image):
     return out
 
 
+def inference_strided(input_image):
+    W1 = utils.weight_variable([9, 9, 3, 32])
+    b1 = utils.bias_variable([32])
+    tf.histogram_summary("W1", W1)
+    tf.histogram_summary("b1", b1)
+    h_conv1 = tf.nn.relu(utils.conv2d_basic(input_image, W1, b1))
+
+    W2 = utils.weight_variable([3, 3, 32, 64])
+    b2 = utils.bias_variable([64])
+    tf.histogram_summary("W2", W2)
+    tf.histogram_summary("b2", b2)
+    h_conv2 = tf.nn.relu(utils.conv2d_strided(h_conv1, W2, b2))
+
+    W3 = utils.weight_variable([3, 3, 64, 128])
+    b3 = utils.bias_variable([128])
+    tf.histogram_summary("W3", W3)
+    tf.histogram_summary("b3", b3)
+    h_conv3 = tf.nn.relu(utils.conv2d_strided(h_conv2, W3, b3))
+
+    # upstrides
+    W4 = utils.weight_variable([3, 3, 128, 64])
+    b4 = utils.bias_variable([64])
+    tf.histogram_summary("W4", W4)
+    tf.histogram_summary("b4", b4)
+    h_conv4 = tf.nn.relu(utils.conv2d_transpose_strided(h_conv3, W4, b4))
+
+    W5 = utils.weight_variable([3, 3, 64, 32])
+    b5 = utils.bias_variable([32])
+    tf.histogram_summary("W5", W5)
+    tf.histogram_summary("b5", b5)
+    h_conv5 = tf.nn.relu(utils.conv2d_transpose_strided(h_conv4, W5, b5))
+
+    W6 = utils.weight_variable([9, 9, 32, 3])
+    b6 = utils.bias_variable([3])
+    tf.histogram_summary("W6", W6)
+    tf.histogram_summary("b6", b6)
+    pred_image = tf.nn.tanh(utils.conv2d_basic(h_conv5, W6, b6))
+
+    return pred_image
+
+
 def test(sess, mean_pixel):
     content_image = get_image(FLAGS.test_image_path)
     print content_image.shape
     processed_content = utils.process_image(content_image, mean_pixel)
-    best = sess.run(inference(processed_content))
+    best = 255 * sess.run(inference_strided(processed_content))
     output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel).astype(np.float32)
     scipy.misc.imsave("output.jpg", output)
 
@@ -202,7 +248,7 @@ def main(argv=None):
         input_image, input_content = inputs(sess, model_params)
 
         print "Setting up inference"
-        output_image = inference(input_image)
+        output_image = 255 * inference_strided(input_image)
 
         print "Calculating various losses"
         image_net = vgg_net(model_params['weights'], output_image)
@@ -250,17 +296,17 @@ def main(argv=None):
             test(sess, model_params['mean_pixel'])
             return
 
-        for step in range(1, MAX_ITERATIONS):
+        for step in range(0, MAX_ITERATIONS):
             train_step.run()
 
-            if step % 100 == 0 or step == MAX_ITERATIONS - 1:
+            if step % 100 == 0:
                 this_loss, summary_str = sess.run([loss, summary_op])
                 summary_writer.add_summary(summary_str, global_step=step)
 
                 print('%s : Step %d' % (datetime.now(), step)),
                 print('    total loss: %g' % this_loss)
 
-            if step % 1000 == 0 or step == MAX_ITERATIONS - 1:
+            if step % 1000 == 0:
                 print('content loss: %g' % content_loss.eval()),
                 print('  style loss: %g' % style_loss.eval()),
                 print('     tv loss: %g' % tv_loss.eval())
