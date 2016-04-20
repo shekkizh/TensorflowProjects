@@ -21,7 +21,7 @@ tf.flags.DEFINE_string("data_dir", "Data_zoo/CIFAR10_data/", """Path to the CIFA
 tf.flags.DEFINE_string("style_path", "", """Path to style image to use""")
 tf.flags.DEFINE_string("mode", "train", "Network mode train/ test")
 tf.flags.DEFINE_string("test_image_path", "", "Path to test image - read only if mode is test")
-tf.flags.DEFINE_integer("batch_size", "64", "Batch size for training")
+tf.flags.DEFINE_integer("batch_size", "128", "Batch size for training")
 
 tf.flags.DEFINE_string("log_dir", "logs/GenerativeNeural_style/", """Path to save logs and checkpoint if needed""")
 
@@ -29,16 +29,16 @@ MODEL_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydee
 
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
-CONTENT_WEIGHT = 2e-3
+CONTENT_WEIGHT = 2e-2
 CONTENT_LAYER = 'relu2_2'
 
-STYLE_WEIGHT = 2e-1
+STYLE_WEIGHT = 2e-2
 STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3')
 
 VARIATION_WEIGHT = 1e-3
 
 LEARNING_RATE = 1e-3
-MAX_ITERATIONS = 90001
+MAX_ITERATIONS = 20001
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 20000
 
@@ -206,11 +206,11 @@ def inference_strided(input_image):
     return pred_image
 
 
-def test(sess, mean_pixel):
+def test(sess, output_image, mean_pixel):
     content_image = get_image(FLAGS.test_image_path)
     print content_image.shape
-    processed_content = utils.process_image(content_image, mean_pixel)
-    best = 255 * sess.run(inference_strided(processed_content))
+    processed_content = utils.process_image(content_image, mean_pixel).astype(np.float32)
+    best = sess.run(output_image,feed_dict={input_image:processed_content})
     output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel).astype(np.float32)
     scipy.misc.imsave("output.jpg", output)
 
@@ -298,12 +298,12 @@ def main(argv=None):
 	    print "Model restored..."
 	
         if FLAGS.mode == "test":
-            test(sess, model_params['mean_pixel'])
+            test(sess, output_image, model_params['mean_pixel'])
             return
-	
+ 	tf.train.start_queue_runners(sess=sess)	
 	print "Running training..."
-        for step in range(0, MAX_ITERATIONS):
-            sess.run(train_step)
+        for step in range(MAX_ITERATIONS):
+	    
 
             if step % 10 == 0:
                 this_loss, summary_str = sess.run([loss, summary_op])
@@ -318,7 +318,7 @@ def main(argv=None):
                 print(' style loss: %g' % style_loss.eval()),
                 print(' tv loss: %g' % tv_loss.eval())
                 saver.save(sess, FLAGS.log_dir + "model.ckpt", global_step=step)
-
+	    sess.run(train_step)
 
 if __name__ == "__main__":
     tf.app.run()
