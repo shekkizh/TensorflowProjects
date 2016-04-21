@@ -29,16 +29,16 @@ MODEL_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydee
 
 DATA_URL = 'http://www.cs.toronto.edu/~kriz/cifar-10-binary.tar.gz'
 
-CONTENT_WEIGHT = 2e-3
+CONTENT_WEIGHT = 2e-2
 CONTENT_LAYER = 'relu2_2'
 
-STYLE_WEIGHT = 2e-1
+STYLE_WEIGHT = 2e-2
 STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3')
 
 VARIATION_WEIGHT = 1e-3
 
 LEARNING_RATE = 1e-3
-MAX_ITERATIONS = 90001
+MAX_ITERATIONS = 20001
 
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 20000
 
@@ -117,7 +117,7 @@ def read_cifar10(model_params, filename_queue):
 
     result.net = vgg_net(model_params["weights"], extended_image)
     content_feature = result.net[CONTENT_LAYER]
-    result.content_features = tf.reshape(content_feature, content_feature.get_shape().as_list()[1:])
+    result.content_features = content_feature
     return result
 
 
@@ -128,24 +128,31 @@ def get_image(image_dir):
 
 
 def read_input(model_params):
-    data_directory = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
-    filenames = [os.path.join(data_directory, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
-    for f in filenames:
-        if not tf.gfile.Exists(f):
-            raise ValueError('Failed to find file: ' + f)
+   if FLAGS.mode == "test":
+        content_image = get_image(FLAGS.test_image_path)
+        print content_image.shape
+        processed_content = utils.process_image(content_image, model_params["mean_pixel"]).astype(np.float32)/255.0
+        return processed_content, _
 
-    filename_queue = tf.train.string_input_producer(filenames)
-    print "Reading cifar10 data"
-    read_input = read_cifar10(model_params, filename_queue)
-    num_preprocess_threads = 8
-    min_queue_examples = int(0.4 * NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN)
-    print "Shuffling train batch"
-    input_images, input_content_features = tf.train.shuffle_batch([read_input.image, read_input.content_features],
-                                                                  batch_size=FLAGS.batch_size,
-                                                                  num_threads=num_preprocess_threads,
-                                                                  capacity=min_queue_examples + 3 * FLAGS.batch_size,
-                                                                  min_after_dequeue=min_queue_examples)
-    return input_images, input_content_features
+   else:
+        data_directory = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
+        filenames = [os.path.join(data_directory, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
+        for f in filenames:
+            if not tf.gfile.Exists(f):
+                raise ValueError('Failed to find file: ' + f)
+
+        filename_queue = tf.train.string_input_producer(filenames)
+        print "Reading cifar10 data"
+        read_input = read_cifar10(model_params, filename_queue)
+        num_preprocess_threads = 8
+        min_queue_examples = int(0.4 * NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN)
+        print "Shuffling train batch"
+        input_images, input_content_features = tf.train.shuffle_batch([read_input.image, read_input.content_features],
+                                                                      batch_size=FLAGS.batch_size,
+                                                                      num_threads=num_preprocess_threads,
+                                                                      capacity=min_queue_examples + 3 * FLAGS.batch_size,
+                                                                      min_after_dequeue=min_queue_examples)
+        return input_images, input_content_features
 
 
 def inference_res(input_image):
@@ -206,12 +213,9 @@ def inference_strided(input_image):
     return pred_image
 
 
-def test(sess, mean_pixel):
-    content_image = get_image(FLAGS.test_image_path)
-    print content_image.shape
-    processed_content = utils.process_image(content_image, mean_pixel)
-    best = 255 * sess.run(inference_strided(processed_content))
-    output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel).astype(np.float32)
+def test(sess, output_image, mean_pixel):
+    best = sess.run(output_image)
+    output = utils.unprocess_image(best.reshape(best.shape[1:]), mean_pixel).astype(np.float32)
     scipy.misc.imsave("output.jpg", output)
 
 
@@ -280,25 +284,30 @@ def main(argv=None):
 
         loss = content_loss + style_loss + tv_loss
         tf.scalar_summary("Total_loss", loss)
-
+        print "Setting up train operation..."
         train_step = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
 
+        print "Setting up summary write"
         summary_writer = tf.train.SummaryWriter(FLAGS.log_dir, sess.graph_def)
         summary_op = tf.merge_all_summaries()
 
+        print "initializing all variables"
         sess.run(tf.initialize_all_variables())
 
+        print "Creating saver.."
         saver = tf.train.Saver()
         ckpt = tf.train.get_checkpoint_state(FLAGS.log_dir)
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess, ckpt.model_checkpoint_path)
+            print "Model restored..."
 
         if FLAGS.mode == "test":
-            test(sess, model_params['mean_pixel'])
+            test(sess, output_image, model_params['mean_pixel'])
             return
+        tf.train.start_queue_runners(sess=sess)
+        print "Running training..."
 
-        for step in range(0, MAX_ITERATIONS):
-            sess.run(train_step)
+        for step in range(MAX_ITERATIONS):
 
             if step % 10 == 0:
                 this_loss, summary_str = sess.run([loss, summary_op])
@@ -313,6 +322,7 @@ def main(argv=None):
                 print(' style loss: %g' % style_loss.eval()),
                 print(' tv loss: %g' % tv_loss.eval())
                 saver.save(sess, FLAGS.log_dir + "model.ckpt", global_step=step)
+            sess.run(train_step)
 
 
 if __name__ == "__main__":
