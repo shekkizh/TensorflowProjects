@@ -13,56 +13,60 @@ if utils_folder not in sys.path:
 import TensorflowUtils as utils
 
 FLAGS = tf.flags.FLAGS
-tf.flags.DEFINE_integer("batch_size", "128", "Train batch size")
+tf.flags.DEFINE_integer("batch_size", "256", "Train batch size")
 tf.flags.DEFINE_string("logs_dir", "logs/MNIST_logs/", "Path to logs dir")
 
 IMAGE_SIZE = 28
-MAX_ITERATIONS = 10001
-LEARNING_RATE = 1e-1
+MAX_ITERATIONS = 20001
+LEARNING_RATE = 1e-3
+REGULARIZATION = 1e-5
 NUM_LABELS = 10
+
 COLORS = np.random.rand(NUM_LABELS)
 
 
-def add_variable_summary(W, b):
+def add_to_reg_loss_and_summary(W, b):
     tf.histogram_summary(W.name, W)
     tf.histogram_summary(b.name, b)
+    tf.add_to_collection("losses", tf.nn.l2_loss(W))
+    tf.add_to_collection("losses", tf.nn.l2_loss(b))
 
 
 def inference_fc(image):
     with tf.name_scope("fc1") as scope:
         W_fc1 = utils.weight_variable([IMAGE_SIZE * IMAGE_SIZE, 50], name="W_fc1")
         b_fc1 = utils.bias_variable([50], name="b_fc1")
-        add_variable_summary(W_fc1, b_fc1)
+        add_to_reg_loss_and_summary(W_fc1, b_fc1)
         h_fc1 = tf.nn.tanh(tf.matmul(image, W_fc1) + b_fc1)
 
     with tf.name_scope("fc2") as scope:
         W_fc2 = utils.weight_variable([50, 50], name="W_fc2")
         b_fc2 = utils.bias_variable([50], name="b_fc2")
-        add_variable_summary(W_fc2, b_fc2)
+        add_to_reg_loss_and_summary(W_fc2, b_fc2)
         h_fc2 = tf.nn.tanh(tf.matmul(h_fc1, W_fc2) + b_fc2)
 
     with tf.name_scope("fc3") as scope:
         W_fc3 = utils.weight_variable([50, 3], name="W_fc3")
         b_fc3 = utils.bias_variable([3], name="b_fc2")
-        add_variable_summary(W_fc3, b_fc3)
+        add_to_reg_loss_and_summary(W_fc3, b_fc3)
         h_fc3 = tf.nn.tanh(tf.matmul(h_fc2, W_fc3) + b_fc3)
 
     with tf.name_scope("fc4") as scope:
         W_fc4 = utils.weight_variable([3, 50], name="W_fc4")
         b_fc4 = utils.bias_variable([50], name="b_fc4")
-        add_variable_summary(W_fc4, b_fc4)
+        add_to_reg_loss_and_summary(W_fc4, b_fc4)
         h_fc4 = tf.nn.tanh(tf.matmul(h_fc3, W_fc4) + b_fc4)
 
     with tf.name_scope("fc5") as scope:
         W_fc5 = utils.weight_variable([50, 50], name="W_fc5")
         b_fc5 = utils.bias_variable([50], name="b_fc5")
-        add_variable_summary(W_fc5, b_fc5)
+        add_to_reg_loss_and_summary(W_fc5, b_fc5)
         h_fc5 = tf.nn.tanh(tf.matmul(h_fc4, W_fc5) + b_fc5)
 
     with tf.name_scope("fc6") as scope:
         W_fc6 = utils.weight_variable([50, IMAGE_SIZE * IMAGE_SIZE], name="W_fc6")
         b_fc6 = utils.bias_variable([IMAGE_SIZE * IMAGE_SIZE], name="b_fc6")
-        add_variable_summary(W_fc6, b_fc6)
+        add_to_reg_loss_and_summary(W_fc6, b_fc6)
         pred = tf.matmul(h_fc5, W_fc6) + b_fc6
 
     return h_fc3, pred
@@ -73,7 +77,7 @@ def inference_conv(image):
     with tf.name_scope("conv1") as scope:
         W_conv1 = utils.weight_variable([5, 5, 1, 32], name="W_conv1")
         b_conv1 = utils.bias_variable([32], name="b_conv1")
-        add_variable_summary(W_conv1, b_conv1)
+        add_to_reg_loss_and_summary(W_conv1, b_conv1)
         h_conv1 = tf.nn.tanh(utils.conv2d_strided(image_reshaped, W_conv1, b_conv1))
 
 
@@ -85,8 +89,12 @@ def main(argv=None):
     encoded, output_image = inference_fc(images)
 
     print "Loss setup..."
-    loss = tf.nn.l2_loss(tf.sub(output_image, images)) / (IMAGE_SIZE * IMAGE_SIZE)
+    loss1 = tf.nn.l2_loss(tf.sub(output_image, images)) / (IMAGE_SIZE * IMAGE_SIZE)
+    loss2 = tf.add_n(tf.get_collection("losses"))
+    loss = loss1 + REGULARIZATION * loss2
     tf.scalar_summary("Loss", loss)
+    tf.scalar_summary("Encoder_loss", loss1)
+    tf.scalar_summary("Reg_loss", loss2)
 
     print "Setting up optimizer..."
     train_op = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss)
@@ -124,8 +132,8 @@ def main(argv=None):
                 write_arr = np.hstack((test_compression, np.argmax(data.test.labels, axis=1).reshape((-1, 1))))
                 np.savetxt(write_file, write_arr)
                 ax.clear()
-                ax.scatter(test_compression[:, 0], test_compression[:, 1], test_compression[:, 2], s=10, c=COLORS[labels], marker='o')
-                plt.savefig("plot%d.png"%step)
+                ax.scatter(test_compression[:, 0], test_compression[:, 1], test_compression[:, 2], s=10,
+                           c=COLORS[labels], marker='o')
                 plt.show()
             sess.run(train_op, feed_dict=feed_dict)
 
