@@ -132,7 +132,7 @@ def read_input(model_params):
         content_image = get_image(FLAGS.test_image_path)
         print content_image.shape
         processed_content = utils.process_image(content_image, model_params["mean_pixel"]).astype(np.float32)/255.0
-        return processed_content, _
+        return processed_content, None
 
    else:
         data_directory = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
@@ -250,6 +250,17 @@ def main(argv=None):
         print "Setting up inference"
         output_image = 255 * inference_strided(input_image)
 
+        print "Creating saver.."
+        saver = tf.train.Saver()
+        ckpt = tf.train.get_checkpoint_state(FLAGS.log_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            saver.restore(sess, ckpt.model_checkpoint_path)
+            print "Model restored..."
+
+        if FLAGS.mode == "test":
+            test(sess, output_image, model_params['mean_pixel'])
+            return
+
         print "Calculating content loss..."
         image_net = vgg_net(model_params['weights'], output_image)
         content_loss = CONTENT_WEIGHT * tf.nn.l2_loss(image_net[CONTENT_LAYER] - input_content) / utils.get_tensor_size(
@@ -294,16 +305,6 @@ def main(argv=None):
         print "initializing all variables"
         sess.run(tf.initialize_all_variables())
 
-        print "Creating saver.."
-        saver = tf.train.Saver()
-        ckpt = tf.train.get_checkpoint_state(FLAGS.log_dir)
-        if ckpt and ckpt.model_checkpoint_path:
-            saver.restore(sess, ckpt.model_checkpoint_path)
-            print "Model restored..."
-
-        if FLAGS.mode == "test":
-            test(sess, output_image, model_params['mean_pixel'])
-            return
         tf.train.start_queue_runners(sess=sess)
         print "Running training..."
 
