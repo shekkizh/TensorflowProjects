@@ -15,11 +15,11 @@ import TensorflowUtils as utils
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_integer("batch_size", "256", "Train batch size")
 tf.flags.DEFINE_string("logs_dir", "logs/MNIST_logs/", "Path to logs dir")
+tf.flags.DEFINE_float("regularization", "1e-4", "Regularization multiplier value")
 
 IMAGE_SIZE = 28
 MAX_ITERATIONS = 20001
 LEARNING_RATE = 1e-3
-REGULARIZATION = 1e-5
 NUM_LABELS = 10
 
 COLORS = np.random.rand(NUM_LABELS)
@@ -73,13 +73,31 @@ def inference_fc(image):
 
 
 def inference_conv(image):
+    # incomplete :/
     image_reshaped = tf.reshape(image, [-1, IMAGE_SIZE, IMAGE_SIZE, 1])
     with tf.name_scope("conv1") as scope:
-        W_conv1 = utils.weight_variable([5, 5, 1, 32], name="W_conv1")
+        W_conv1 = utils.weight_variable([3, 3, 1, 32], name="W_conv1")
         b_conv1 = utils.bias_variable([32], name="b_conv1")
         add_to_reg_loss_and_summary(W_conv1, b_conv1)
-        h_conv1 = tf.nn.tanh(utils.conv2d_strided(image_reshaped, W_conv1, b_conv1))
+        h_conv1 = tf.nn.tanh(utils.conv2d_basic(image_reshaped, W_conv1, b_conv1))
 
+    with tf.name_scope("conv2") as scope:
+        W_conv2 = utils.weight_variable([3, 3, 32, 64], name="W_conv2")
+        b_conv2 = utils.bias_variable([64], name="b_conv2")
+        add_to_reg_loss_and_summary(W_conv2, b_conv2)
+        h_conv2 = tf.nn.tanh(utils.conv2d_strided(h_conv1, W_conv2, b_conv2))
+
+    with tf.name_scope("conv3") as scope:
+        W_conv3 = utils.weight_variable([3, 3, 64, 128], name="W_conv3")
+        b_conv3 = utils.bias_variable([128], name="b_conv3")
+        add_to_reg_loss_and_summary(W_conv3, b_conv3)
+        h_conv3 = tf.nn.tanh(utils.conv2d_strided(h_conv2, W_conv3, b_conv3))
+
+    with tf.name_scope("conv4") as scope:
+        W_conv4 = utils.weight_variable([3, 3, 128, 256], name="W_conv4")
+        b_conv4 = utils.bias_variable([256], name="b_conv4")
+        add_to_reg_loss_and_summary(W_conv4, b_conv4)
+        h_conv4 = tf.nn.tanh(utils.conv2d_strided(h_conv3, W_conv4, b_conv4))
 
 def main(argv=None):
     print "Reading MNIST data..."
@@ -91,7 +109,7 @@ def main(argv=None):
     print "Loss setup..."
     loss1 = tf.nn.l2_loss(tf.sub(output_image, images)) / (IMAGE_SIZE * IMAGE_SIZE)
     loss2 = tf.add_n(tf.get_collection("losses"))
-    loss = loss1 + REGULARIZATION * loss2
+    loss = loss1 + FLAGS.regularization * loss2
     tf.scalar_summary("Loss", loss)
     tf.scalar_summary("Encoder_loss", loss1)
     tf.scalar_summary("Reg_loss", loss2)
