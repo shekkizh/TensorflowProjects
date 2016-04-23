@@ -17,3 +17,4 @@ Data_zoo/EmotionDetector/
 Data_zoo/TU_Graz_Data/
 logs/EmotionDetector_logs/
 logs/FaceDetection_logs/
+logs/MNIST_logs/
