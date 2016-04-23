@@ -24,6 +24,10 @@ Here are a few results,
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Visualization_logs/visualization_conv5_3_0.jpg" />
 
+ - Image Inversion - An implementation based on Mahendran/Vedaldi's paper. Note that the optimization objective didn't account for variation loss across image and hence the result. Hope to get that fixed in the future :/
+ 
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/ImageInversion_check_dp.jpg" width="250" height="300"/>
+
 - NeuralArtist - Not exactly the best the network could do - but since my laptop was crying so loud, had to stop halfway through the optimization :(
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/NeuralArtist_logs/run6/neural_artist_check_final.jpg" />
