@@ -25,7 +25,6 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False):
         if is_tarfile:
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
-
 def xavier_init(fan_in, fan_out, constant=1):
     """ Xavier initialization of network weights"""
     # https://stackoverflow.com/questions/33640581/how-to-do-xavier-initialization-on-tensorflow
