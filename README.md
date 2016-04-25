@@ -40,7 +40,8 @@ Here are a few results,
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/MNIST_logs/run3/AutoEncoder_0.png" width="400" height="300"/>
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/MNIST_logs/run3/AutoEncoder_20k.png" width="400" height="300"/>
 
-- Image Analogy - it was interesting to see how the model tries to learn. The model corresponding to just image loss seems to optimize shape followed by color and scale, though this process seems painfully slow. The results below are intermediate results for two predictions. (Will be getting back to this problem later...)
+- Image Analogy - it was interesting to see how the model tries to learn. The model corresponding to just image loss seems to optimize shape followed by color and scale, though this process seems painfully slow - Rotation optimization so far doesn't seem to be visible on the horizon. 
+The results below are intermediate results for two predictions. (Will be getting back to this problem later...)
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/images/image_analogy_150k.JPG" width="400" height="600"/>
 
