@@ -25,6 +25,7 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False):
         if is_tarfile:
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
 
+
 def xavier_init(fan_in, fan_out, constant=1):
     """ Xavier initialization of network weights"""
     # https://stackoverflow.com/questions/33640581/how-to-do-xavier-initialization-on-tensorflow
@@ -35,12 +36,18 @@ def xavier_init(fan_in, fan_out, constant=1):
 
 def weight_variable(shape, stddev=0.1, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial, name=name)
+    if name is None:
+        return tf.Variable(initial)
+    else:
+        return tf.get_variable(name, initializer=initial)
 
 
 def bias_variable(shape, name=None):
     initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial, name=name)
+    if name is None:
+        return tf.Variable(initial)
+    else:
+        return tf.get_variable(name, initializer=initial)
 
 
 def get_tensor_size(tensor):
@@ -58,11 +65,14 @@ def conv2d_strided(x, W, b):
     return tf.nn.bias_add(conv, b)
 
 
-def conv2d_transpose_strided(x, W, b):
-    output_shape = x.get_shape().as_list()
-    output_shape[1] *=2
-    output_shape[2] *=2
-    output_shape[3] = W.get_shape().as_list()[2]
+def conv2d_transpose_strided(x, W, b, output_shape=None):
+    # print x.get_shape()
+    # print W.get_shape()
+    if output_shape is None:
+        output_shape = x.get_shape().as_list()
+        output_shape[1] *= 2
+        output_shape[2] *= 2
+        output_shape[3] = W.get_shape().as_list()[2]
     # print output_shape
     conv = tf.nn.conv2d_transpose(x, W, output_shape, strides=[1, 2, 2, 1], padding="SAME")
     return tf.nn.bias_add(conv, b)
@@ -92,6 +102,7 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
     """
     Modified implementation from github ry?!
     """
+
     def conv_transpose(tensor, out_channel, shape, strides, name=None):
         out_shape = tensor.get_shape().as_list()
         in_channel = out_shape[-1]
