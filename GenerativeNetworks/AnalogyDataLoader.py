@@ -13,7 +13,7 @@ class Loader(object):
         self.batch_size = batch_size
         self.options = ['rotate', 'scale', 'xpos', 'ypos']
 
-        mat_path = os.path.join(dir_path, "nips2015-analogy-data", "data", "shapes48.mat")
+        mat_path = os.path.join(dir_path, "data", "shapes48.mat")
         print (" [*] loading %s" % mat_path)
         mat = scipy.io.loadmat(mat_path)
 
