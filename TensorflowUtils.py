@@ -162,3 +162,8 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
 
         x = b1 + b2
         return tf.nn.relu(x, name='relu')
+
+
+def add_to_regularization_and_summary(var):
+    tf.histogram_summary(var.op.name, var)
+    tf.add_to_collection("reg_loss", tf.nn.l2_loss(var))
