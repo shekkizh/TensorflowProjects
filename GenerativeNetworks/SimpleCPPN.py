@@ -1,5 +1,5 @@
 __author__ = 'Charlie'
-# Implementation draws details from hardmaru's code in github
+# Implementation draws details from https://github.com/hardmaru/cppn-tensorflow
 import numpy as np
 import tensorflow as tf
 import os, sys, inspect
