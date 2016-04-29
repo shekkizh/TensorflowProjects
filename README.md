@@ -21,7 +21,7 @@ A repo of everything deep and neurally related. Implementations and ideas are la
 Here are a few results,
  - Deep dreaming with a cloud
     
-<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run3/0_clouds_deepdream_conv5_1.jpg" width="600" height="450" />
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run3/0_clouds_deepdream_conv5_1.jpg" width="500" height="375" />
 
  - Visualizing the first filter of VGG layer conv5_3
  
@@ -43,7 +43,13 @@ Here are a few results,
 - Image Analogy - it was interesting to see how the model tries to learn. The model corresponding to just image loss seems to optimize shape followed by color and scale, though this process seems painfully slow - Rotation optimization so far doesn't seem to be visible on the horizon. 
 The results below are intermediate results for two predictions. (Will be getting back to this problem later...)
 
-<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/images/image_analogy_150k.JPG" width="400" height="600"/>
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/images/image_analogy_150k.JPG" width="300" height="450"/>
+
+- Composite Pattern Producing Networks - Somethings are best left random and unexplained. Fun little project with the simplest of code.
+
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/CPPN_logs/figure_12_64.png" width="250" height="193"/>
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/CPPN_logs/figure_16_48.png" width="250" height="193"/>
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/CPPN_logs/figure_18_64.png" width="250" height="193"/>
 
 
 
