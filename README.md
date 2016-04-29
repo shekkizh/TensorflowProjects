@@ -19,9 +19,10 @@ A repo of everything deep and neurally related. Implementations and ideas are la
  - TensorflowUtils - Since most of the time parameters are just given a default value.
 
 Here are a few results,
- - Deep dreaming with a cloud
-    
-<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run3/0_clouds_deepdream_conv5_1.jpg" width="500" height="375" />
+ - Deep dreams
+ 
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run9/4_dp_deepdream_conv5_2.jpg" width="320" height="400" />
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run3/0_clouds_deepdream_conv5_1.jpg" width="540" height="400" />
 
  - Visualizing the first filter of VGG layer conv5_3
  
