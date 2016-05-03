@@ -96,10 +96,9 @@ def main(argv=None):
 
     loss_val = loss(logits, labels)
     train_op = train(loss_val, global_step)
-
-    print "Setting up summary and saver..."
     summary_op = tf.merge_all_summaries()
     with tf.Session() as sess:
+        print "Setting up summary and saver..."
         sess.run(tf.initialize_all_variables())
         summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph)
         saver = tf.train.Saver()
@@ -108,24 +107,25 @@ def main(argv=None):
             saver.restore(sess, ckpt.model_checkpoint_path)
             print "Model restored!"
 
-        for step in xrange(MAX_ITERATIONS):
-            offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
+        if FLAGS.mode == "train":
+            for step in xrange(MAX_ITERATIONS):
+                offset = (step * BATCH_SIZE) % (train_labels.shape[0] - BATCH_SIZE)
 
-            batch_data = train_dataset[offset:(offset + BATCH_SIZE), :]
-            batch_labels = train_labels[offset:(offset + BATCH_SIZE), :]
+                batch_data = train_dataset[offset:(offset + BATCH_SIZE), :]
+                batch_labels = train_labels[offset:(offset + BATCH_SIZE), :]
 
-            feed_dict = {dataset: batch_data, labels: batch_labels}
-            if step % 100 == 0:
-                l, summary_str = sess.run([loss_val, summary_op], feed_dict=feed_dict)
-                print "Step: %d Mini batch loss: %g"%(step, l)
-                summary_writer.add_summary(summary_str, step)
+                feed_dict = {dataset: batch_data, labels: batch_labels}
+                if step % 100 == 0:
+                    l, summary_str = sess.run([loss_val, summary_op], feed_dict=feed_dict)
+                    print "Step: %d Mini batch loss: %g"%(step, l)
+                    summary_writer.add_summary(summary_str, step)
 
-            if step % 1000 == 0:
-                valid_loss = sess.run(loss_val, feed_dict={dataset:valid_dataset, labels:valid_labels})
-                print "-- Validation loss %g" % valid_loss
-                saver.save(sess, FLAGS.logs_dir +"model.ckpt", global_step=step)
+                if step % 1000 == 0:
+                    valid_loss = sess.run(loss_val, feed_dict={dataset:valid_dataset, labels:valid_labels})
+                    print "-- Validation loss %g" % valid_loss
+                    saver.save(sess, FLAGS.logs_dir +"model.ckpt", global_step=step)
 
-            sess.run(train_op, feed_dict=feed_dict)
+                sess.run(train_op, feed_dict=feed_dict)
 
         test_loss = sess.run(loss_val, feed_dict={dataset:test_dataset, labels:test_labels})
         print "Test loss: %g" % test_loss
