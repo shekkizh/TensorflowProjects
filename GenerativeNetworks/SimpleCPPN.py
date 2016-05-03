@@ -23,7 +23,7 @@ tf.flags.DEFINE_string("mode", "color", "Color/ Gray image output")
 def show_image(image):
     plt.subplot(1, 1, 1)
     if NUM_CHANNELS == 1:
-        plt.imshow(image.reshape(IMAGE_SIZE, IMAGE_SIZE), cmap='Greys', interpolation='nearest')
+        plt.imshow(255*image.reshape(IMAGE_SIZE, IMAGE_SIZE), cmap='Greysarr ', interpolation='nearest')
     else:
         plt.imshow(255 * image, interpolation='nearest')
     plt.axis('off')
@@ -91,8 +91,8 @@ def main(argv=None):
     z_vec = np.random.normal(size=(BATCH_SIZE, Z_DIMENSION))
     # z_vec = np.random.uniform(-1.0, 1.0, size=(BATCH_SIZE, Z_DIMENSION)).astype(np.float32)
 
-    with open("genome.csv", "a") as f:
-        np.savetxt(f, z_vec, delimiter=",")
+    # with open("genome.csv", "a") as f:
+    #     np.savetxt(f, z_vec, delimiter=",")
 
     x_vec, y_vec, r_vec = get_coordinates()
     with tf.Session() as sess:

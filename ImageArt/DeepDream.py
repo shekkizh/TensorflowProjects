@@ -22,10 +22,10 @@ tf.flags.DEFINE_string("logs_dir", "logs/Deepdream_logs/", """Path to save logs 
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
-LEARNING_RATE = 1.5
-MAX_ITERATIONS = 10
-DREAM_LAYER = "conv5_1"
-DREAM_FEATURE = 52
+LEARNING_RATE = 2
+MAX_ITERATIONS = 1
+DREAM_LAYER = "conv5_2"
+DREAM_FEATURE = 128
 
 
 def get_model_data():
@@ -147,7 +147,7 @@ def deepdream_image(model_params, image, octave_scale=1.4, no_of_octave=4):
                     print '.',
                 print "."
 
-            step /= 2.0  # halfing step size every itr
+            # step /= 2.0  # halfing step size every itr
             feature += 15
             temp_file = "%d_%s" % (itr, filename)
             # print dummy_image.shape
@@ -166,7 +166,7 @@ def main(argv=None):
     mean = model_data['normalization'][0][0][0]
     model_params["mean_pixel"] = np.mean(mean, axis=(0, 1))
     model_params["weights"] = np.squeeze(model_data['layers'])
-    deepdream_image(model_params, dream_image, no_of_octave=1)
+    deepdream_image(model_params, dream_image, no_of_octave=3)
 
 
 if __name__ == "__main__":
