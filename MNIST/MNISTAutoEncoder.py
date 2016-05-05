@@ -3,8 +3,8 @@ import tensorflow as tf
 import os, sys, inspect
 import numpy as np
 import tensorflow.examples.tutorials.mnist as mnist
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# import matplotlib.pyplot as plt
+# from mpl_toolkits.mplot3d import Axes3D
 
 utils_folder = os.path.realpath(
     os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
@@ -47,7 +47,7 @@ def inference_fc(image):
 
     with tf.name_scope("fc3") as scope:
         W_fc3 = utils.weight_variable([50, 3], name="W_fc3")
-        b_fc3 = utils.bias_variable([3], name="b_fc2")
+        b_fc3 = utils.bias_variable([3], name="b_fc3")
         add_to_reg_loss_and_summary(W_fc3, b_fc3)
         h_fc3 = tf.nn.tanh(tf.matmul(h_fc2, W_fc3) + b_fc3)
 
@@ -62,6 +62,7 @@ def inference_fc(image):
         b_fc5 = utils.bias_variable([50], name="b_fc5")
         add_to_reg_loss_and_summary(W_fc5, b_fc5)
         h_fc5 = tf.nn.tanh(tf.matmul(h_fc4, W_fc5) + b_fc5)
+        # h_fc_dropout = tf.nn.dropout(h_fc5, 0.5)
 
     with tf.name_scope("fc6") as scope:
         W_fc6 = utils.weight_variable([50, IMAGE_SIZE * IMAGE_SIZE], name="W_fc6")
@@ -103,8 +104,10 @@ def main(argv=None):
     print "Reading MNIST data..."
     data = mnist.input_data.read_data_sets("MNIST_data", one_hot=True)
     images = tf.placeholder(tf.float32, [None, IMAGE_SIZE * IMAGE_SIZE])
+    tf.image_summary("Input", tf.reshape(images, [-1, IMAGE_SIZE, IMAGE_SIZE, 1]), max_images=1)
     print "Setting up inference..."
     encoded, output_image = inference_fc(images)
+    tf.image_summary("Output", tf.reshape(output_image, [-1, IMAGE_SIZE, IMAGE_SIZE, 1]), max_images=1)
 
     print "Loss setup..."
     loss1 = tf.nn.l2_loss(tf.sub(output_image, images)) / (IMAGE_SIZE * IMAGE_SIZE)
@@ -120,9 +123,9 @@ def main(argv=None):
     print 'Setting up graph summary...'
     summary_op = tf.merge_all_summaries()
 
-    print "Creating matplot fig"
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    # print "Creating matplot fig"
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
 
     with tf.Session() as sess:
         summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph_def)
@@ -149,10 +152,10 @@ def main(argv=None):
                 write_file = os.path.join(FLAGS.logs_dir, "checkpoint%d.txt" % step)
                 write_arr = np.hstack((test_compression, np.argmax(data.test.labels, axis=1).reshape((-1, 1))))
                 np.savetxt(write_file, write_arr)
-                ax.clear()
-                ax.scatter(test_compression[:, 0], test_compression[:, 1], test_compression[:, 2], s=10,
-                           c=COLORS[labels], marker='o')
-                plt.show()
+                # ax.clear()
+                # ax.scatter(test_compression[:, 0], test_compression[:, 1], test_compression[:, 2], s=10,
+                #            c=COLORS[labels], marker='o')
+                # plt.show()
             sess.run(train_op, feed_dict=feed_dict)
 
 
