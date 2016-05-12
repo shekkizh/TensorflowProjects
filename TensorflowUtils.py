@@ -34,6 +34,11 @@ def xavier_init(fan_in, fan_out, constant=1):
     return tf.random_uniform((fan_in, fan_out), minval=low, maxval=high, dtype=tf.float32)
 
 
+def weight_variable_xavier_initialized(shape, constant=1, name=None):
+    stddev = constant * np.sqrt(2.0 / (shape[2] + shape[3]))
+    return weight_variable(shape, stddev=stddev, name= name)
+
+
 def weight_variable(shape, stddev=0.1, name=None):
     initial = tf.truncated_normal(shape, stddev=0.1)
     if name is None:
