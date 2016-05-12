@@ -15,7 +15,7 @@ import TensorflowUtils as utils
 IMAGE_SIZE = 256
 NUM_CHANNELS = 3
 BATCH_SIZE = 1
-Z_DIMENSION = 32
+Z_DIMENSION = 8
 
 
 def show_image(image):
@@ -83,8 +83,8 @@ def main(argv=None):
 
     gen_image = generate_image(x, y, r, z)
 
-    z_vec = np.random.normal(size =(BATCH_SIZE, Z_DIMENSION))
-    # z_vec = np.random.uniform(-1.0, 1.0, size=(BATCH_SIZE, Z_DIMENSION)).astype(np.float32)
+    # z_vec = np.random.normal(size =(BATCH_SIZE, Z_DIMENSION))
+    z_vec = np.random.uniform(-1.0, 1.0, size=(BATCH_SIZE, Z_DIMENSION)).astype(np.float32)
     x_vec, y_vec, r_vec = get_coordinates()
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
