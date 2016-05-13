@@ -162,7 +162,7 @@ def main(argv=None):
     with tf.Session() as sess:
         print "Setting up summary writer, queue, saver..."
         sess.run(tf.initialize_all_variables())
-        tf.train.start_queue_runners(sess)
+        
         summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph_def)
         saver = tf.train.Saver()
 
@@ -170,7 +170,7 @@ def main(argv=None):
         if ckpt and ckpt.model_checkpoint_path:
             print "Restoring model from checkpoint..."
             saver.restore(sess, ckpt.model_checkpoint_path)
-
+tf.train.start_queue_runners(sess)
         for step in xrange(MAX_ITERATIONS):
             if step % 100 == 0:
                 loss_val, summary_str = sess.run([image_loss, summary_op])

@@ -13,11 +13,18 @@ if utils_folder not in sys.path:
 
 import TensorflowUtils as utils
 
+
+
+
+
+
+
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_integer("image_size", "256", "Image size")
 tf.flags.DEFINE_integer("genome_length", "10", "Length of genome to be given as input")
 tf.flags.DEFINE_integer("net_size", "32", "Breadth of hidden units")
 tf.flags.DEFINE_string("mode", "color", "Color/ Gray image output")
+
 
 
 def show_image(image):
@@ -88,11 +95,14 @@ def main(argv=None):
 
     gen_image = generate_image(x, y, r, z)
 
+
+
     z_vec = np.random.normal(size=(BATCH_SIZE, Z_DIMENSION))
     # z_vec = np.random.uniform(-1.0, 1.0, size=(BATCH_SIZE, Z_DIMENSION)).astype(np.float32)
 
     # with open("genome.csv", "a") as f:
     #     np.savetxt(f, z_vec, delimiter=",")
+
 
     x_vec, y_vec, r_vec = get_coordinates()
     with tf.Session() as sess:
