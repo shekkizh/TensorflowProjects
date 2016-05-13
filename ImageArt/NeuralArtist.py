@@ -1,9 +1,14 @@
 __author__ = 'Charlie'
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 import scipy.misc as misc
-import os, sys, argparse
+import os, sys, argparse, inspect
 import random
+
+utils_path = os.path.realpath(os.path.abspath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
+if utils_path not in sys.path:
+    sys.path.insert(0, utils_path)
+
 import TensorflowUtils as utils
 
 ap = argparse.ArgumentParser("Train a network to guess RGB of image")
@@ -13,7 +18,7 @@ args = vars(ap.parse_args())
 LOG_DIR = "logs/NeuralArtist_logs/"
 
 NEURONS_PER_LAYER = 20
-LEARNING_RATE = 1e-2
+LEARNING_RATE = 1e-4
 MOMENTUM_RATE = 0.9
 MAX_ITERATIONS = 100000
 
@@ -139,7 +144,7 @@ def main(argv=None):
                         pred_image = sess.run(pred_val, feed_dict={inputs: input_value})
                         pred_image = np.reshape(pred_image,
                                                 image.shape)  # utils.unprocess_image(np.reshape(pred_image, image.shape), mean_pixel)
-                        misc.imsave("neural_artist_check.jpg", pred_image)
+                        misc.imsave("neural_artist_check.png", pred_image)
                         best_loss = this_loss
 
                 if step%1000 == 0:
@@ -148,7 +153,7 @@ def main(argv=None):
             best_image = sess.run(pred_val, feed_dict={inputs: input_value})
             best_image = np.reshape(best_image,
                                     image.shape)  # utils.unprocess_image(np.reshape(best_image, image.shape), mean_pixel)
-            misc.imsave("neural_artist.jpg", best_image)
+            misc.imsave("neural_artist.png", best_image)
 
 
 if __name__ == "__main__":

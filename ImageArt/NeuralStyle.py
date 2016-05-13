@@ -32,7 +32,7 @@ STYLE_LAYERS = ('relu1_2', 'relu2_2', 'relu3_3','relu4_2')
 VARIATION_WEIGHT = 1
 LEARNING_RATE = 1e-2
 MOMENTUM = 0.9
-MAX_ITERATIONS = 10000
+MAX_ITERATIONS = int(1 + 1e5)
 
 
 def get_model_data():
