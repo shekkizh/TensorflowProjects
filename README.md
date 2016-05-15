@@ -32,9 +32,9 @@ Here are a few results,
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/ImageInversion_check_dp.jpg" width="250" height="300"/>
 
-- NeuralArtist - Not exactly the best the network could do - but since my laptop was crying so loud, had to stop halfway through the optimization :(
+- NeuralArtist - Not exactly the best the network could do - but got bored and didn't want to see the model try hard. If you squint a bit you will see the image better :P
 
-<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/NeuralArtist_logs/run6/neural_artist_check_final.jpg" />
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/NeuralArtist_logs/run8/neural_artist_check.png" />
 
 - An attempt at MNIST Autoencoder (3 bottleneck variables) - An idea borrowed from karpathy's convnet.js. As noticed in the other implementation running the encoder longer does reduce the error and the separation further. Here's a sample of the difference from start to 20k iterations. Different colors correspond to labels 0-9.
 
