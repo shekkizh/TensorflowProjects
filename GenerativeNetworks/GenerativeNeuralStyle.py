@@ -128,13 +128,13 @@ def get_image(image_dir):
 
 
 def read_input(model_params):
-   if FLAGS.mode == "test":
+    if FLAGS.mode == "test":
         content_image = get_image(FLAGS.test_image_path)
         print content_image.shape
-        processed_content = utils.process_image(content_image, model_params["mean_pixel"]).astype(np.float32)/255.0
+        processed_content = utils.process_image(content_image, model_params["mean_pixel"]).astype(np.float32) / 255.0
         return processed_content, None
 
-   else:
+    else:
         data_directory = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
         filenames = [os.path.join(data_directory, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
         for f in filenames:

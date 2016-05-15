@@ -1,8 +1,8 @@
 __author__ = 'Charlie'
 # Implementation based on neural style paper
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 import scipy.io
 import scipy.misc
 from datetime import datetime
@@ -23,7 +23,7 @@ tf.flags.DEFINE_string("log_dir", "logs/Neural_style_logs/", """Path to save log
 
 DATA_URL = 'http://www.vlfeat.org/matconvnet/models/beta16/imagenet-vgg-verydeep-19.mat'
 
-CONTENT_WEIGHT = 2e-4
+CONTENT_WEIGHT = 2e-2
 CONTENT_LAYERS = ('relu2_2',)
 
 STYLE_WEIGHT = 2e-1
@@ -46,6 +46,7 @@ def get_model_data():
 
 def get_image(image_dir):
     image = scipy.misc.imread(image_dir)
+    print image.shape
     image = np.ndarray.reshape(image.astype(np.float32), (((1,) + image.shape)))
     return image
 
@@ -157,7 +158,7 @@ def main(argv=None):
                     best_loss = this_loss
                     best = dummy_image.eval()
                     output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel)
-                    scipy.misc.imsave("output_check.jpg", output)
+                    scipy.misc.imsave("output_check.png", output)
 
             if i % 100 == 0 or i == MAX_ITERATIONS - 1:
                 print('  content loss: %g' % content_loss.eval()),
@@ -165,7 +166,7 @@ def main(argv=None):
                 print('       tv loss: %g' % tv_loss.eval())
 
     output = utils.unprocess_image(best.reshape(content_image.shape[1:]), mean_pixel)
-    scipy.misc.imsave("output.jpg", output)
+    scipy.misc.imsave("output.png", output)
 
 
 if __name__ == "__main__":

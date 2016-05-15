@@ -1,7 +1,7 @@
 __author__ = 'Charlie'
 """Image coloring by fully convolutional networks - incomplete """
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 import os, sys, inspect
 from datetime import datetime
 import scipy.misc as misc
@@ -93,38 +93,38 @@ def inputs():
 
 
 def inference(image):
-    W1 = utils.weight_variable([9, 9, 1, 32])
+    W1 = utils.weight_variable_xavier_initialized([9, 9, 1, 32])
     b1 = utils.bias_variable([32])
     tf.histogram_summary("W1", W1)
     tf.histogram_summary("b1", b1)
     h_conv1 = tf.nn.relu(utils.conv2d_basic(image, W1, b1))
 
-    W2 = utils.weight_variable([3, 3, 32, 64])
+    W2 = utils.weight_variable_xavier_initialized([3, 3, 32, 64])
     b2 = utils.bias_variable([64])
     tf.histogram_summary("W2", W2)
     tf.histogram_summary("b2", b2)
     h_conv2 = tf.nn.relu(utils.conv2d_strided(h_conv1, W2, b2))
 
-    W3 = utils.weight_variable([3, 3, 64, 128])
+    W3 = utils.weight_variable_xavier_initialized([3, 3, 64, 128])
     b3 = utils.bias_variable([128])
     tf.histogram_summary("W3", W3)
     tf.histogram_summary("b3", b3)
     h_conv3 = tf.nn.relu(utils.conv2d_strided(h_conv2, W3, b3))
 
     # upstrides
-    W4 = utils.weight_variable([3, 3, 64, 128])
+    W4 = utils.weight_variable_xavier_initialized([3, 3, 64, 128])
     b4 = utils.bias_variable([64])
     tf.histogram_summary("W4", W4)
     tf.histogram_summary("b4", b4)
     h_conv4 = tf.nn.relu(utils.conv2d_transpose_strided(h_conv3, W4, b4))
 
-    W5 = utils.weight_variable([3, 3, 32, 64])
+    W5 = utils.weight_variable_xavier_initialized([3, 3, 32, 64])
     b5 = utils.bias_variable([32])
     tf.histogram_summary("W5", W5)
     tf.histogram_summary("b5", b5)
     h_conv5 = tf.nn.relu(utils.conv2d_transpose_strided(h_conv4, W5, b5))
 
-    W6 = utils.weight_variable([9, 9, 32, 3])
+    W6 = utils.weight_variable_xavier_initialized([9, 9, 32, 3])
     b6 = utils.bias_variable([3])
     tf.histogram_summary("W6", W6)
     tf.histogram_summary("b6", b6)
@@ -141,7 +141,7 @@ def loss(pred, colored):
 
 def train(loss_val, step):
     learning_rate = tf.train.exponential_decay(LEARNING_RATE, step, 0.4 * MAX_ITERATIONS, 0.99)
-    train_op = tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss_val, global_step=step)
+    train_op = tf.train.AdamOptimizer(learning_rate).minimize(loss_val, global_step=step)
     return train_op
 
 
@@ -163,16 +163,16 @@ def main(argv=None):
         print "Setting up summary writer, queue, saver..."
         sess.run(tf.initialize_all_variables())
         
-        summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph_def)
+        summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph)
         saver = tf.train.Saver()
 
         ckpt = tf.train.get_checkpoint_state(FLAGS.logs_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print "Restoring model from checkpoint..."
             saver.restore(sess, ckpt.model_checkpoint_path)
-tf.train.start_queue_runners(sess)
+        tf.train.start_queue_runners(sess)
         for step in xrange(MAX_ITERATIONS):
-            if step % 100 == 0:
+            if step % 400 == 0:
                 loss_val, summary_str = sess.run([image_loss, summary_op])
                 print "Step %d, Loss: %g" % (step, loss_val)
                 summary_writer.add_summary(summary_str, global_step=step)

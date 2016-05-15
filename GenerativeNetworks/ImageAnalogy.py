@@ -180,7 +180,7 @@ def main(argv=None):
     with tf.Session() as sess:
         sess.run(tf.initialize_all_variables())
         print "Setting up summary and saver..."
-        summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph_def)
+        summary_writer = tf.train.SummaryWriter(FLAGS.logs_dir, sess.graph)
         saver = tf.train.Saver()
 
         ckpt = tf.train.get_checkpoint_state(FLAGS.logs_dir)
