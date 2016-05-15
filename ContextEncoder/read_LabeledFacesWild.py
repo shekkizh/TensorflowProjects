@@ -13,7 +13,7 @@ if utils_path not in sys.path:
 import TensorflowUtils as utils
 
 DATA_URL = 'http://vis-www.cs.umass.edu/lfw/lfw.tgz'
-
+IMAGE_SIZE = 250
 
 def read_lfw_dataset(data_dir):
     pickle_filename = "lfw.pickle"

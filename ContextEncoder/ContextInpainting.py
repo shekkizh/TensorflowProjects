@@ -21,8 +21,6 @@ NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 2000
 MAX_ITERATIONS = int(1e5 + 1)
 LEARNING_RATE = 1e-3
 
-DATASET_IMAGE_SIZE = 250
-
 IMAGE_SIZE = 128
 
 
@@ -228,4 +226,5 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
+    DATASET_IMAGE_SIZE = read_LabeledFacesWild.IMAGE_SIZE
     tf.app.run()
