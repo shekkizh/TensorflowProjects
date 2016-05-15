@@ -1,6 +1,6 @@
 #**Tensorflow Projects**
 A repo of everything deep and neurally related. Implementations and ideas are largely based on papers from arxiv and implementations, tutorials from the internet. 
-
+ - ContextEncoder - Context Inpainting - a modified implementation based on the idea from [Context Encoder: Feature Learning by Inpainting](https://arxiv.org/pdf/1604.07379v1.pdf)
  - Emotion Detection - Kaggle class problem.
  - Face Detection - Face Detection as a regression problem from kaggle.
  - Generative Networks - Attempts at generative models mostly done with strided convolution and it's transposes.
@@ -19,6 +19,9 @@ A repo of everything deep and neurally related. Implementations and ideas are la
  - TensorflowUtils - Since most of the time parameters are just given a default value.
 
 Here are a few results,
+ - Face Inpainting - Tried Context Encoder on Labeled Faces in Wild dataset and these are the results
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/ContextInpainting_logs/run1/Selection_001.png" width="298" height="480" />
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/ContextInpainting_logs/run1/Selection_002.png" width="289" height="480" />
  - Deep dreams
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/checkpoints/run9/4_dp_deepdream_conv5_2.jpg" width="320" height="400" />
@@ -32,7 +35,7 @@ Here are a few results,
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/ImageInversion_check_dp.jpg" width="250" height="300"/>
 
-- NeuralArtist - Not exactly the best the network could do - but got bored and didn't want to see the model try hard. If you squint a bit you will see the image better :P
+- NeuralArtist - Not exactly the best the network could do - but impatience got the better of me. If you squint a bit you will see the image better :P
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/NeuralArtist_logs/run8/neural_artist_check.png" />
 
