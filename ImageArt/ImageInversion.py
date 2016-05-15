@@ -1,13 +1,19 @@
 __author__ = 'Charlie'
 # Attempt at Mahendran and Vedaldi's Understanding Deep Image Representations by Inverting them
 
-import tensorflow as tf
 import numpy as np
+import tensorflow as tf
 import scipy.io
 import scipy.misc
 from datetime import datetime
+import os, sys, inspect
+
+utils_path = os.path.abspath(
+    os.path.realpath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
+if utils_path not in sys.path:
+    sys.path.insert(0, utils_path)
 import TensorflowUtils as utils
-import os, sys
+
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("image_path", "", """Path to image to be inverted""")
@@ -85,7 +91,7 @@ def main(argv=None):
     mean = model_data['normalization'][0][0][0]
     mean_pixel = np.mean(mean, axis=(0, 1))
 
-    processed_image = utils.process_image(invert_image, mean_pixel)
+    processed_image = utils.process_image(invert_image, mean_pixel).astype(np.float32)
     weights = np.squeeze(model_data['layers'])
 
     invert_net = vgg_net(weights, processed_image)
@@ -119,10 +125,10 @@ def main(argv=None):
                     best_loss = this_loss
                     best = dummy_image.eval()
                     output = utils.unprocess_image(best.reshape(invert_image.shape[1:]), mean_pixel)
-                    scipy.misc.imsave("invert_check.jpg", output)
+                    scipy.misc.imsave("invert_check.png", output)
 
     output = utils.unprocess_image(best.reshape(invert_image.shape[1:]), mean_pixel)
-    scipy.misc.imsave("output.jpg", output)
+    scipy.misc.imsave("output.png", output)
 
 
 if __name__ == "__main__":
