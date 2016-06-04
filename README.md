@@ -13,7 +13,6 @@ A repo of everything deep and neurally related. Implementations and ideas are la
  - notMNIST - Well you got to follow up MNIST with something :D
  - logs - Tensorflow Summary and Saver directory for all problems.
  - There are a couple of more implementations as attempts to solve a few other problems
-	 - YelpRestaturantClassification - Here's a tip: don't even bother trying this without a GPU.
 	 - Deblurring - Posing blurring in images as conv net problem - architecture is based on Image super-resolution paper by Dong et al.
 	 - FindInceptionSimilarity - This implementation made me realize an important concept in machine learning in general - Symbolism vs Distributed representations. 
  - TensorflowUtils - Since most of the time parameters are just given a default value.
