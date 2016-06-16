@@ -13,7 +13,6 @@ A repo of everything deep and neurally related. Implementations and ideas are la
  - notMNIST - Well you got to follow up MNIST with something :D
  - logs - Tensorflow Summary and Saver directory for all problems.
  - There are a couple of more implementations as attempts to solve a few other problems
-	 - YelpRestaturantClassification - Here's a tip: don't even bother trying this without a GPU.
 	 - Deblurring - Posing blurring in images as conv net problem - architecture is based on Image super-resolution paper by Dong et al.
 	 - FindInceptionSimilarity - This implementation made me realize an important concept in machine learning in general - Symbolism vs Distributed representations. 
  - TensorflowUtils - Since most of the time parameters are just given a default value.
@@ -33,7 +32,7 @@ Here are a few results,
 
  - Image Inversion - An implementation based on Mahendran/Vedaldi's paper. Note that the optimization objective didn't account for variation loss across image and hence the result. Hope to get that fixed in the future :/
  
-<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Deepdream_logs/ImageInversion_check_dp.jpg" width="250" height="300"/>
+<img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/ImageInversion_logs/invert_check.png" width="250" height="300"/>
 
 - NeuralArtist - Not exactly the best the network could do - but impatience got the better of me. If you squint a bit you will see the image better :P
 
