@@ -18,3 +18,6 @@ Data_zoo/TU_Graz_Data/
 logs/EmotionDetector_logs/
 logs/FaceDetection_logs/
 logs/MNIST_logs/
+*.xml
+*/*.xml
+Data_zoo/Analogy_data Data_zoo/CIFAR10_data Data_zoo/COCO Data_zoo/Faces_lfw Data_zoo/flowers_data

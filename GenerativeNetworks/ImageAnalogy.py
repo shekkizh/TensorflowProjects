@@ -23,8 +23,8 @@ tf.flags.DEFINE_integer("batch_size", "64", "Batch size for training")
 MAX_ITERATIONS = 1 + int(1e5)
 IMAGE_SIZE = 48
 LEARNING_RATE = 1e-3
-ANALOGY_COEFF = 1e-1
-REGULARIZER = 0.0
+ANALOGY_COEFF = 1
+REGULARIZER = 1e-6
 
 DATA_URL = "http://www-personal.umich.edu/~reedscot/files/nips2015-analogy-data.tar.gz"
 
