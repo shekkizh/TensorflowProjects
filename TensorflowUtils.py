@@ -83,6 +83,10 @@ def conv2d_transpose_strided(x, W, b, output_shape=None):
     return tf.nn.bias_add(conv, b)
 
 
+def leaky_relu(x, alpha=0.0, name=""):
+    return tf.maximum(alpha * x, x, name)
+
+
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
 
@@ -196,3 +200,14 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
 def add_to_regularization_and_summary(var):
     tf.histogram_summary(var.op.name, var)
     tf.add_to_collection("reg_loss", tf.nn.l2_loss(var))
+
+
+def add_activation_summary(var):
+    tf.histogram_summary(var.op.name + "/activation", var)
+    tf.scalar_summary(var.op.name + "/sparsity", tf.nn.zero_fraction(var))
+
+
+def add_gradient_summary(grad, var):
+    if grad is not None:
+        tf.histogram_summary(var.op.name + "/gradient", grad)
+
