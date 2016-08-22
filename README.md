@@ -30,21 +30,20 @@ Here are a few results,
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/Visualization_logs/visualization_conv5_3_0.jpg" />
 
- - Image Inversion - An implementation based on Mahendran/Vedaldi's paper. Note that the optimization objective didn't account for variation loss across image and hence the result. Hope to get that fixed in the future :/
+ - Image Inversion - An implementation based on Mahendran/Vedaldi's paper. Note that the optimization objective didn't account for variation loss across image and hence the visible noisy patterns in the result.
  
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/ImageInversion_logs/invert_check.png" width="250" height="300"/>
 
-- NeuralArtist - Not exactly the best the network could do - but impatience got the better of me. If you squint a bit you will see the image better :P
+- NeuralArtist - Not exactly the best the network could do - but impatience got the better of me. The idea is to map a location to a RGB value and optimize a model to generate an image. If you squint a bit you will see the image better :)
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/NeuralArtist_logs/run8/neural_artist_check.png" />
 
-- An attempt at MNIST Autoencoder (3 bottleneck variables) - An idea borrowed from karpathy's convnet.js. As noticed in the other implementation running the encoder longer does reduce the error and the separation further. Here's a sample of the difference from start to 20k iterations. Different colors correspond to labels 0-9.
+- An attempt at MNIST Autoencoder (3 bottleneck variables) - An idea borrowed from karpathy's convnet.js. As noticed in the convnet.js page running the encoder longer does reduce the error and the separation further. Here's a sample of the difference from start to 20k iterations. Different colors correspond to labels 0-9.
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/MNIST_logs/run3/AutoEncoder_0.png" width="400" height="300"/>
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/logs/MNIST_logs/run3/AutoEncoder_20k.png" width="400" height="300"/>
 
-- Image Analogy - it was interesting to see how the model tries to learn. The model corresponding to just image loss seems to optimize shape followed by color and scale, though this process seems painfully slow - Rotation optimization so far doesn't seem to be visible on the horizon. 
-The results below are intermediate results for two predictions. (Will be getting back to this problem later...)
+- Image Analogy - it was interesting to see how the model tries to learn. The model corresponding to just image loss seems to optimize shape followed by color and scale, though this process seems painfully slow - Rotation optimization so far doesn't seem to be visible on the horizon. Left image corresponds to result on the most trained model and the right corresponds to intermediate result. (Will be getting back to this problem later...)
 
 <img src="https://github.com/shekkizh/TensorflowProjects/blob/master/images/image_analogy_150k.JPG" width="300" height="450"/>
 
