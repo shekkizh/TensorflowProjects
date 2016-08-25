@@ -4,13 +4,14 @@ import numpy as np
 import tensorflow as tf
 import os, sys, inspect
 from datetime import datetime
-import read_LabeledFacesWild
+
 
 utils_path = os.path.abspath(
     os.path.realpath(os.path.join(os.path.split(inspect.getfile(inspect.currentframe()))[0], "..")))
 if utils_path not in sys.path:
     sys.path.insert(0, utils_path)
 import TensorflowUtils as utils
+import Dataset_Reader.read_LabeledFacesWild as read_LabeledFacesWild
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_string("data_dir", "Data_zoo/Faces_lfw/", "Path to dataset")

@@ -47,10 +47,12 @@ def encoder_fc(images):
         W_fc3 = utils.weight_variable([50, FLAGS.z_dim], name="W_fc3")
         b_fc3 = utils.bias_variable([FLAGS.z_dim], name="b_fc3")
         mu = tf.add(tf.matmul(h_relu2, W_fc3), b_fc3, name="mu")
+        utils.add_activation_summary(mu)
 
         W_fc4 = utils.weight_variable([50, FLAGS.z_dim], name="W_fc4")
         b_fc4 = utils.bias_variable([FLAGS.z_dim], name="b_fc4")
         log_var = tf.add(tf.matmul(h_relu2, W_fc4), b_fc4, name="log_var")
+        utils.add_activation_summary(log_var)
 
     return mu, log_var
 
