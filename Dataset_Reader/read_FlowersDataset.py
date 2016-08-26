@@ -15,7 +15,7 @@ import TensorflowUtils as utils
 DATA_URL = 'http://download.tensorflow.org/example_images/flower_photos.tgz'
 
 
-def read_flowers_dataset(data_dir):
+def read_dataset(data_dir):
     pickle_filename = "flowers_data.pickle"
     pickle_filepath = os.path.join(data_dir, pickle_filename)
     if not os.path.exists(pickle_filepath):
