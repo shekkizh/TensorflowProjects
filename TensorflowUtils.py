@@ -5,9 +5,10 @@ import numpy as np
 import os, sys
 from six.moves import urllib
 import tarfile
+import zipfile
 
 
-def maybe_download_and_extract(dir_path, url_name, is_tarfile=False):
+def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=False):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     filename = url_name.split('/')[-1]
@@ -24,6 +25,10 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False):
         print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
         if is_tarfile:
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
+        elif is_zipfile:
+            with zipfile.ZipFile(filepath) as zf:
+                zip_dir = zf.namelist()[0]
+                zf.extractall(dir_path)
 
 
 def xavier_init(fan_in, fan_out, constant=1):
@@ -198,8 +203,9 @@ def bottleneck_unit(x, out_chan1, out_chan2, down_stride=False, up_stride=False,
 
 
 def add_to_regularization_and_summary(var):
-    tf.histogram_summary(var.op.name, var)
-    tf.add_to_collection("reg_loss", tf.nn.l2_loss(var))
+    if var is not None:
+        tf.histogram_summary(var.op.name, var)
+        tf.add_to_collection("reg_loss", tf.nn.l2_loss(var))
 
 
 def add_activation_summary(var):
