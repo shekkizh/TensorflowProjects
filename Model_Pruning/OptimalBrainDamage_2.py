@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __author__ = 'shekkizh'
 import numpy as np
 import tensorflow as tf
@@ -23,28 +25,47 @@ IMAGE_SIZE = 28
 
 def inference(data):
     with tf.variable_scope("inference") as scope:
-        W_1 = utils.weight_variable([IMAGE_SIZE * IMAGE_SIZE * 50], name="W_1")
-        b_1 = utils.bias_variable([50], name="b_1")
+        weight_variable_size = IMAGE_SIZE * IMAGE_SIZE * 50 + 50 * 50 * 3 + 50 * 10
+        bias_variable_size = 4 * 50 + 10
+        variable = utils.weight_variable([weight_variable_size + bias_variable_size], name="variables")
+        weight_variable = tf.slice(variable, [0], [weight_variable_size], name="weights")
+        bias_variable = tf.slice(variable, [weight_variable_size], [bias_variable_size], name="biases")
+        weight_offset = 0
+        bias_offset = 0
+        W_1 = tf.slice(weight_variable, [weight_offset], [IMAGE_SIZE * IMAGE_SIZE * 50], name="W_1")
+        b_1 = tf.slice(bias_variable, [bias_offset], [50], name="b_1")
         h_1 = tf.nn.relu(tf.matmul(data, tf.reshape(W_1, [IMAGE_SIZE * IMAGE_SIZE, 50])) + b_1, name='h_1')
         utils.add_activation_summary(h_1)
 
-        W_2 = utils.weight_variable([50 * 50], name="W_2")
-        b_2 = utils.bias_variable([50], name="b_2")
+        weight_offset += IMAGE_SIZE * IMAGE_SIZE * 50
+        bias_offset += 50
+
+        W_2 = tf.slice(weight_variable, [weight_offset], [50 * 50], name="W_2")
+        b_2 = tf.slice(bias_variable, [bias_offset], [50], name="b_2")
         h_2 = tf.nn.relu(tf.matmul(h_1, tf.reshape(W_2, [50, 50])) + b_2, name='h_2')
         utils.add_activation_summary(h_2)
 
-        W_3 = utils.weight_variable([50 * 50], name="W_3")
-        b_3 = utils.bias_variable([50], name="b_3")
+        weight_offset += 50 * 50
+        bias_offset += 50
+
+        W_3 = tf.slice(weight_variable, [weight_offset], [50 * 50], name="W_3")
+        b_3 = tf.slice(bias_variable, [bias_offset], [50], name="b_3")
         h_3 = tf.nn.relu(tf.matmul(h_2, tf.reshape(W_3, [50, 50])) + b_3, name='h_3')
         utils.add_activation_summary(h_3)
 
-        W_4 = utils.weight_variable([50 * 50], name="W_4")
-        b_4 = utils.bias_variable([50], name="b_4")
+        weight_offset += 50 * 50
+        bias_offset += 50
+
+        W_4 = tf.slice(weight_variable, [weight_offset], [50 * 50], name="W_4")
+        b_4 = tf.slice(bias_variable, [bias_offset], [50], name="b_4")
         h_4 = tf.nn.relu(tf.matmul(h_3, tf.reshape(W_4, [50, 50])) + b_4, name='h_4')
         utils.add_activation_summary(h_4)
 
-        W_final = utils.weight_variable([50 * 10], name="W_final")
-        b_final = utils.bias_variable([10], name="b_final")
+        weight_offset += 50 * 50
+        bias_offset += 50
+
+        W_final = tf.slice(weight_variable, [weight_offset], [50 * 10], name="W_final")
+        b_final = tf.slice(bias_variable, [bias_offset], [10], name="b_final")
         pred = tf.nn.softmax(tf.matmul(h_4, tf.reshape(W_final, [50, 10])) + b_final, name='h_final')
         # utils.add_activation_summary(pred)
     return pred
@@ -53,9 +74,15 @@ def inference(data):
 def train(loss, var_list):
     optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate)
     grads = optimizer.compute_gradients(loss, var_list=var_list)
-    # for grad, var in grads:
-    #     utils.add_gradient_summary(grad, var)
-    return optimizer.apply_gradients(grads)
+    hessian = []
+    for grad, var in grads:
+        # utils.add_gradient_summary(grad, var)
+        grad = 0 if None else grad
+        grad2 = tf.gradients(grad, var)
+        grad2 = 0 if None else grad2
+        # utils.add_gradient_summary(grad2, var)
+        hessian.append(tf.pack(grad2))
+    return optimizer.apply_gradients(grads), hessian
 
 
 def main(argv=None):
@@ -68,7 +95,7 @@ def main(argv=None):
     train_vars = tf.trainable_variables()
     for v in train_vars:
         utils.add_to_regularization_and_summary(v)
-    train_op = train(entropy, train_vars)
+    train_op, hess = train(entropy, train_vars)
     accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(pred_labels, 1), tf.argmax(truth_labels, 1)), tf.float32))
 
     # Session start
@@ -104,27 +131,31 @@ def main(argv=None):
                 saver.save(sess, FLAGS.logs_dir + 'model.ckpt', i)
 
     train_vars_copy = sess.run([tf.identity(var) for var in train_vars])
-    print ('Variables Perecent: %d, Test accuracy: %g' % (100, test()))
+    print('Variables Perecent: %d, Test accuracy: %g' % (100, test()))
 
     k = tf.placeholder(tf.int32)
 
-    def scatter_add(variables):
+    def scatter_update(saliency, variables):
         shape = utils.get_tensor_size(variables)
-        values, indices = tf.nn.top_k(-1 * variables, tf.cast(k * shape / 100, tf.int32))
-        return tf.scatter_add(variables, indices, values)
+        values, indices = tf.nn.top_k(-1 * saliency, tf.cast(k * shape / 10, tf.int32))
+        return tf.scatter_update(variables, indices, tf.zeros_like(values))
 
-    def scatter_subtract(variables1, variables2):
+    def scatter_restore(saliency, variables1, variables2):
         shape = utils.get_tensor_size(variables2)
-        values, indices = tf.nn.top_k(-1 * variables1, tf.cast(k * shape / 100, tf.int32))
-        return tf.scatter_sub(variables2, indices, values)
+        values, indices = tf.nn.top_k(-1 * saliency, tf.cast(k * shape / 10, tf.int32))
+        values = tf.gather(variables1, indices)
+        return tf.scatter_update(variables2, indices, values)
 
-    scatter_add_op = [scatter_add(var) for var in train_vars]
-    scatter_sub_op = [scatter_subtract(var1, var2) for var1, var2 in zip(train_vars_copy, train_vars)]
+    scatter_update_op = [scatter_update(sal, var) for sal, var in zip(hess, train_vars)]
+    scatter_restore_op = [scatter_restore(sal, var1, var2) for sal, var1, var2 in
+                          zip(hess, train_vars_copy, train_vars)]
 
-    for count in range(1, 20):
-        sess.run(scatter_add_op, feed_dict={k: count})
-        print ('Variables Perecent: %d, Test accuracy: %g' % ((100 - count), test()))
-        sess.run(scatter_sub_op, feed_dict={k: count})
+    for count in range(1, 8):
+        batch = dataset.train.next_batch(FLAGS.batch_size)
+        feed_dict = {input_data: batch[0], truth_labels: batch[1], k: count}
+        sess.run(scatter_update_op, feed_dict=feed_dict)
+        print('Variables Perecent: %d, Test accuracy: %g' % (10*(10 - count), test()))
+        sess.run(scatter_restore_op, feed_dict=feed_dict)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 __author__ = 'shekkizh'
 import numpy as np
 import tensorflow as tf
@@ -53,9 +55,18 @@ def inference(data):
 def train(loss, var_list):
     optimizer = tf.train.AdamOptimizer(FLAGS.learning_rate)
     grads = optimizer.compute_gradients(loss, var_list=var_list)
-    # for grad, var in grads:
-    #     utils.add_gradient_summary(grad, var)
-    return optimizer.apply_gradients(grads)
+    hessian = []
+    for grad, var in grads:
+        # utils.add_gradient_summary(grad, var)
+        if grad is None:
+            grad2 = 0
+        else:
+            grad = 0 if None else grad
+            grad2 = tf.gradients(grad, var)
+            grad2 = 0 if None else grad2
+            # utils.add_gradient_summary(grad2, var)
+        hessian.append(tf.pack(grad2))
+    return optimizer.apply_gradients(grads), hessian
 
 
 def main(argv=None):
@@ -68,7 +79,7 @@ def main(argv=None):
     train_vars = tf.trainable_variables()
     for v in train_vars:
         utils.add_to_regularization_and_summary(v)
-    train_op = train(entropy, train_vars)
+    train_op, hess = train(entropy, train_vars)
     accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(pred_labels, 1), tf.argmax(truth_labels, 1)), tf.float32))
 
     # Session start
@@ -104,27 +115,33 @@ def main(argv=None):
                 saver.save(sess, FLAGS.logs_dir + 'model.ckpt', i)
 
     train_vars_copy = sess.run([tf.identity(var) for var in train_vars])
-    print ('Variables Perecent: %d, Test accuracy: %g' % (100, test()))
+    print('Variables Perecent: %d, Test accuracy: %g' % (100, test()))
 
     k = tf.placeholder(tf.int32)
 
-    def scatter_add(variables):
+    def scatter_update(saliency, variables):
         shape = utils.get_tensor_size(variables)
-        values, indices = tf.nn.top_k(-1 * variables, tf.cast(k * shape / 100, tf.int32))
-        return tf.scatter_add(variables, indices, values)
+        # print(utils.get_tensor_size(saliency))
+        # print(shape)
+        values, indices = tf.nn.top_k(-1 * saliency, tf.cast(k * shape / 100, tf.int32))
+        return tf.scatter_update(variables, indices, tf.zeros_like(values))
 
-    def scatter_subtract(variables1, variables2):
+    def scatter_restore(saliency, variables1, variables2):
         shape = utils.get_tensor_size(variables2)
-        values, indices = tf.nn.top_k(-1 * variables1, tf.cast(k * shape / 100, tf.int32))
-        return tf.scatter_sub(variables2, indices, values)
+        values, indices = tf.nn.top_k(-1 * saliency, tf.cast(k * shape / 100, tf.int32))
+        values = tf.gather(variables1, indices)
+        return tf.scatter_update(variables2, indices, values)
 
-    scatter_add_op = [scatter_add(var) for var in train_vars]
-    scatter_sub_op = [scatter_subtract(var1, var2) for var1, var2 in zip(train_vars_copy, train_vars)]
+    scatter_update_op = [scatter_update(sal, var) for sal, var in zip(hess, train_vars)]
+    scatter_restore_op = [scatter_restore(sal, var1, var2) for sal, var1, var2 in
+                          zip(hess, train_vars_copy, train_vars)]
 
     for count in range(1, 20):
-        sess.run(scatter_add_op, feed_dict={k: count})
-        print ('Variables Perecent: %d, Test accuracy: %g' % ((100 - count), test()))
-        sess.run(scatter_sub_op, feed_dict={k: count})
+        batch = dataset.train.next_batch(FLAGS.batch_size)
+        feed_dict = {input_data: batch[0], truth_labels: batch[1], k: count}
+        sess.run(scatter_update_op, feed_dict=feed_dict)
+        print('Variables Perecent: %d, Test accuracy: %g' % ((100 - count), test()))
+        sess.run(scatter_restore_op, feed_dict=feed_dict)
 
 
 if __name__ == "__main__":
