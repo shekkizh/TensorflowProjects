@@ -12,6 +12,8 @@ if utils_folder not in sys.path:
 
 import TensorflowUtils as utils
 import Dataset_Reader.read_celebADataset as celebA
+import Dataset_Reader.BatchDatsetReader as dataset
+from six.moves import xrange
 
 FLAGS = tf.flags.FLAGS
 tf.flags.DEFINE_integer("batch_size", "64", "batch size for training")
@@ -25,6 +27,7 @@ NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 800
 MAX_ITERATIONS = int(1e5 + 1)
 MODEL_IMAGE_SIZE = 108
 IMAGE_SIZE = 64
+NUM_OF_CHANNELS = 3
 GEN_DIMENSION = 16
 
 
@@ -35,7 +38,7 @@ def _read_input(filename_queue):
     reader = tf.WholeFileReader()
     key, value = reader.read(filename_queue)
     record = DataRecord()
-    decoded_image = tf.image.decode_jpeg(value, channels=3)
+    decoded_image = tf.image.decode_jpeg(value, channels=NUM_OF_CHANNELS)
     decoded_image_4d = tf.expand_dims(decoded_image, 0)
     resized_image = tf.image.resize_bilinear(decoded_image_4d, [IMAGE_SIZE, IMAGE_SIZE])
     record.input_image = tf.squeeze(resized_image, squeeze_dims=[0])
@@ -57,7 +60,7 @@ def read_input_queue(filename_queue):
                                  num_threads=num_preprocess_threads,
                                  capacity=min_queue_examples + 2 * FLAGS.batch_size
                                  )
-    input_image = (input_image - 128) / 128.0
+    input_image = input_image / 127.5 - 1
     return input_image
 
 
@@ -72,7 +75,7 @@ def generator(z, train_mode):
         h_relu0 = tf.nn.relu(h_bn0, name='relu0')
         utils.add_activation_summary(h_relu0)
 
-        # W_1 = utils.weight_variable_xavier_initialized([5, 5, 64 * GEN_DIMENSION/2, 64 * GEN_DIMENSION], name="W_1")
+        # W_1 = utils.weight_variable([5, 5, 64 * GEN_DIMENSION/2, 64 * GEN_DIMENSION], name="W_1")
         # b_1 = utils.bias_variable([64 * GEN_DIMENSION/2], name="b_1")
         # deconv_shape = tf.pack([tf.shape(h_relu0)[0], IMAGE_SIZE / 16, IMAGE_SIZE / 16, 64 * GEN_DIMENSION/2])
         # h_conv_t1 = utils.conv2d_transpose_strided(h_relu0, W_1, b_1, output_shape=deconv_shape)
@@ -80,8 +83,8 @@ def generator(z, train_mode):
         # h_relu1 = tf.nn.relu(h_bn1, name='relu1')
         # utils.add_activation_summary(h_relu1)
 
-        W_2 = utils.weight_variable_xavier_initialized([5, 5, 64 * GEN_DIMENSION / 4, 64 * GEN_DIMENSION / 2],
-                                                       name="W_2")
+        W_2 = utils.weight_variable([5, 5, 64 * GEN_DIMENSION / 4, 64 * GEN_DIMENSION / 2],
+                                    name="W_2")
         b_2 = utils.bias_variable([64 * GEN_DIMENSION / 4], name="b_2")
         deconv_shape = tf.pack([tf.shape(h_relu0)[0], IMAGE_SIZE / 8, IMAGE_SIZE / 8, 64 * GEN_DIMENSION / 4])
         h_conv_t2 = utils.conv2d_transpose_strided(h_relu0, W_2, b_2, output_shape=deconv_shape)
@@ -89,8 +92,8 @@ def generator(z, train_mode):
         h_relu2 = tf.nn.relu(h_bn2, name='relu2')
         utils.add_activation_summary(h_relu2)
 
-        W_3 = utils.weight_variable_xavier_initialized([5, 5, 64 * GEN_DIMENSION / 8, 64 * GEN_DIMENSION / 4],
-                                                       name="W_3")
+        W_3 = utils.weight_variable([5, 5, 64 * GEN_DIMENSION / 8, 64 * GEN_DIMENSION / 4],
+                                    name="W_3")
         b_3 = utils.bias_variable([64 * GEN_DIMENSION / 8], name="b_3")
         deconv_shape = tf.pack([tf.shape(h_relu2)[0], IMAGE_SIZE / 4, IMAGE_SIZE / 4, 64 * GEN_DIMENSION / 8])
         h_conv_t3 = utils.conv2d_transpose_strided(h_relu2, W_3, b_3, output_shape=deconv_shape)
@@ -98,8 +101,8 @@ def generator(z, train_mode):
         h_relu3 = tf.nn.relu(h_bn3, name='relu3')
         utils.add_activation_summary(h_relu3)
 
-        W_4 = utils.weight_variable_xavier_initialized([5, 5, 64 * GEN_DIMENSION / 16, 64 * GEN_DIMENSION / 8],
-                                                       name="W_4")
+        W_4 = utils.weight_variable([5, 5, 64 * GEN_DIMENSION / 16, 64 * GEN_DIMENSION / 8],
+                                    name="W_4")
         b_4 = utils.bias_variable([64 * GEN_DIMENSION / 16], name="b_4")
         deconv_shape = tf.pack([tf.shape(h_relu3)[0], IMAGE_SIZE / 2, IMAGE_SIZE / 2, 64 * GEN_DIMENSION / 16])
         h_conv_t4 = utils.conv2d_transpose_strided(h_relu3, W_4, b_4, output_shape=deconv_shape)
@@ -107,9 +110,9 @@ def generator(z, train_mode):
         h_relu4 = tf.nn.relu(h_bn4, name='relu4')
         utils.add_activation_summary(h_relu4)
 
-        W_5 = utils.weight_variable_xavier_initialized([5, 5, 3, 64 * GEN_DIMENSION / 16], name="W_5")
-        b_5 = utils.bias_variable([3], name="b_5")
-        deconv_shape = tf.pack([tf.shape(h_relu4)[0], IMAGE_SIZE, IMAGE_SIZE, 3])
+        W_5 = utils.weight_variable([5, 5, NUM_OF_CHANNELS, 64 * GEN_DIMENSION / 16], name="W_5")
+        b_5 = utils.bias_variable([NUM_OF_CHANNELS], name="b_5")
+        deconv_shape = tf.pack([tf.shape(h_relu4)[0], IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS])
         h_conv_t5 = utils.conv2d_transpose_strided(h_relu4, W_5, b_5, output_shape=deconv_shape)
         pred_image = tf.nn.tanh(h_conv_t5, name='pred_image')
         utils.add_activation_summary(pred_image)
@@ -121,28 +124,28 @@ def discriminator(input_images, train_mode):
     # dropout_prob = 1.0
     # if train_mode:
     #     dropout_prob = 0.5
-    W_conv0 = utils.weight_variable_xavier_initialized([5, 5, 3, 64 * 1], name="W_conv0")
+    W_conv0 = utils.weight_variable([5, 5, NUM_OF_CHANNELS, 64 * 1], name="W_conv0")
     b_conv0 = utils.bias_variable([64 * 1], name="b_conv0")
     h_conv0 = utils.conv2d_strided(input_images, W_conv0, b_conv0)
     h_bn0 = h_conv0  # utils.batch_norm(h_conv0, 64 * 1, train_mode, scope="disc_bn0")
     h_relu0 = utils.leaky_relu(h_bn0, 0.2, name="h_relu0")
     utils.add_activation_summary(h_relu0)
 
-    W_conv1 = utils.weight_variable_xavier_initialized([5, 5, 64 * 1, 64 * 2], name="W_conv1")
+    W_conv1 = utils.weight_variable([5, 5, 64 * 1, 64 * 2], name="W_conv1")
     b_conv1 = utils.bias_variable([64 * 2], name="b_conv1")
     h_conv1 = utils.conv2d_strided(h_relu0, W_conv1, b_conv1)
     h_bn1 = utils.batch_norm(h_conv1, 64 * 2, train_mode, scope="disc_bn1")
     h_relu1 = utils.leaky_relu(h_bn1, 0.2, name="h_relu1")
     utils.add_activation_summary(h_relu1)
 
-    W_conv2 = utils.weight_variable_xavier_initialized([5, 5, 64 * 2, 64 * 4], name="W_conv2")
+    W_conv2 = utils.weight_variable([5, 5, 64 * 2, 64 * 4], name="W_conv2")
     b_conv2 = utils.bias_variable([64 * 4], name="b_conv2")
     h_conv2 = utils.conv2d_strided(h_relu1, W_conv2, b_conv2)
     h_bn2 = utils.batch_norm(h_conv2, 64 * 4, train_mode, scope="disc_bn2")
     h_relu2 = utils.leaky_relu(h_bn2, 0.2, name="h_relu2")
     utils.add_activation_summary(h_relu2)
 
-    W_conv3 = utils.weight_variable_xavier_initialized([5, 5, 64 * 4, 64 * 8], name="W_conv3")
+    W_conv3 = utils.weight_variable([5, 5, 64 * 4, 64 * 8], name="W_conv3")
     b_conv3 = utils.bias_variable([64 * 8], name="b_conv3")
     h_conv3 = utils.conv2d_strided(h_relu2, W_conv3, b_conv3)
     h_bn3 = utils.batch_norm(h_conv3, 64 * 8, train_mode, scope="disc_bn3")
@@ -155,7 +158,7 @@ def discriminator(input_images, train_mode):
     b_4 = utils.bias_variable([1], name="b_4")
     h_4 = tf.matmul(h_3, W_4) + b_4
 
-    return tf.nn.sigmoid(h_4), h_4
+    return tf.nn.sigmoid(h_4), h_4, h_relu3
 
 
 def train(loss_val, var_list):
@@ -167,23 +170,29 @@ def train(loss_val, var_list):
 
 
 def main(argv=None):
+    print("Setting up image reader...")
     train_images, valid_images, test_images = celebA.read_dataset(FLAGS.data_dir)
-    filename_queue = tf.train.string_input_producer(train_images)
-    images = read_input_queue(filename_queue)
+    image_options = {"crop": True, "crop_size": MODEL_IMAGE_SIZE, "resize": True, "resize_size": IMAGE_SIZE}
+    dataset_reader = dataset.BatchDatset(train_images, image_options)
 
+    # filename_queue = tf.train.string_input_producer(train_images)
+    # images = read_input_queue(filename_queue)
+
+    images = tf.placeholder(tf.float32, [FLAGS.batch_size, IMAGE_SIZE, IMAGE_SIZE, NUM_OF_CHANNELS])
     train_phase = tf.placeholder(tf.bool)
     z_vec = tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.z_dim], name="z")
-    # images = tf.placeholder(tf.float32, [FLAGS.batch_size, IMAGE_SIZE, IMAGE_SIZE, 3], name="images_real")
+
+    print("Setting up network model...")
     tf.histogram_summary("z", z_vec)
     tf.image_summary("image_real", images, max_images=2)
     gen_images = generator(z_vec, train_phase)
     tf.image_summary("image_generated", gen_images, max_images=2)
 
     with tf.variable_scope("discriminator") as scope:
-        discriminator_real_prob, logits_real = discriminator(images, train_phase)
+        discriminator_real_prob, logits_real, feature_real = discriminator(images, train_phase)
         utils.add_activation_summary(tf.identity(discriminator_real_prob, name='disc_real_prob'))
         scope.reuse_variables()
-        discriminator_fake_prob, logits_fake = discriminator(gen_images, train_phase)
+        discriminator_fake_prob, logits_fake, feature_fake = discriminator(gen_images, train_phase)
         utils.add_activation_summary(tf.identity(discriminator_fake_prob, name='disc_fake_prob'))
 
     discriminator_loss_real = tf.reduce_mean(
@@ -191,17 +200,20 @@ def main(argv=None):
     discrimintator_loss_fake = tf.reduce_mean(
         tf.nn.sigmoid_cross_entropy_with_logits(logits_fake, tf.zeros_like(logits_fake)))
     discriminator_loss = discrimintator_loss_fake + discriminator_loss_real
-    gen_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits_fake, tf.ones_like(logits_fake)))
-
+    gen_loss_1 = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits_fake, tf.ones_like(logits_fake)))
+    gen_loss_2 = tf.reduce_mean(tf.nn.l2_loss(feature_real - feature_fake)) / (IMAGE_SIZE * IMAGE_SIZE)
+    gen_loss = gen_loss_1 + 0.1 * gen_loss_2
+    
     tf.scalar_summary("Discriminator_loss_real", discriminator_loss_real)
     tf.scalar_summary("Discrimintator_loss_fake", discrimintator_loss_fake)
     tf.scalar_summary("Discriminator_loss", discriminator_loss)
     tf.scalar_summary("Generator_loss", gen_loss)
 
-    train_variables = tf.all_variables()
+    train_variables = tf.trainable_variables()
     generator_variables = [v for v in train_variables if v.name.startswith("generator")]
+    # print(map(lambda x: x.op.name, generator_variables))
     discriminator_variables = [v for v in train_variables if v.name.startswith("discriminator")]
-
+    # print(map(lambda x: x.op.name, discriminator_variables))
     generator_train_op = train(gen_loss, generator_variables)
     discriminator_train_op = train(discriminator_loss, discriminator_variables)
 
@@ -218,16 +230,19 @@ def main(argv=None):
     if ckpt and ckpt.model_checkpoint_path:
         saver.restore(sess, ckpt.model_checkpoint_path)
         print("Model restored...")
-    coord = tf.train.Coordinator()
-    threads = tf.train.start_queue_runners(sess, coord)
+    # coord = tf.train.Coordinator()
+    # threads = tf.train.start_queue_runners(sess, coord)
     try:
         for itr in xrange(MAX_ITERATIONS):
             batch_z = np.random.uniform(-1.0, 1.0, size=[FLAGS.batch_size, FLAGS.z_dim]).astype(np.float32)
-            feed_dict = {z_vec: batch_z, train_phase: True}
+            feed_dict = {images: dataset_reader.next_batch(FLAGS.batch_size), z_vec: batch_z, train_phase: True}
 
             # if itr % 2 == 0:
             #     sess.run(discriminator_train_op, feed_dict=feed_dict)
-            sess.run([discriminator_train_op, generator_train_op, generator_train_op], feed_dict=feed_dict)
+            sess.run(discriminator_train_op, feed_dict=feed_dict)
+            sess.run(generator_train_op, feed_dict=feed_dict)
+            sess.run(generator_train_op, feed_dict=feed_dict)
+            # sess.run(generator_train_op, feed_dict={z_vec: batch_z, train_phase: True})
 
             if itr % 10 == 0:
                 g_loss_val, d_loss_val, summary_str = sess.run([gen_loss, discriminator_loss, summary_op],
@@ -238,13 +253,15 @@ def main(argv=None):
             if itr % 500 == 0:
                 saver.save(sess, FLAGS.logs_dir + "model.ckpt", global_step=itr)
 
-    except tf.errors.OutOfRangeError:
-        print('Done training -- epoch limit reached')
-    finally:
-        coord.request_stop()
-
-    # Wait for threads to finish.
-    coord.join(threads)
+    # except tf.errors.OutOfRangeError:
+    #     print('Done training -- epoch limit reached')
+    # finally:
+    #     coord.request_stop()
+    #
+    # # Wait for threads to finish.
+    # coord.join(threads)
+    except KeyboardInterrupt:
+        print("Ending Training...")
 
 
 if __name__ == "__main__":

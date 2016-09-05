@@ -44,8 +44,8 @@ def weight_variable_xavier_initialized(shape, constant=1, name=None):
     return weight_variable(shape, stddev=stddev, name=name)
 
 
-def weight_variable(shape, stddev=0.1, name=None):
-    initial = tf.truncated_normal(shape, stddev=0.1)
+def weight_variable(shape, stddev=0.02, name=None):
+    initial = tf.truncated_normal(shape, stddev=stddev)
     if name is None:
         return tf.Variable(initial)
     else:
@@ -53,7 +53,7 @@ def weight_variable(shape, stddev=0.1, name=None):
 
 
 def bias_variable(shape, name=None):
-    initial = tf.constant(0.1, shape=shape)
+    initial = tf.constant(0.0, shape=shape)
     if name is None:
         return tf.Variable(initial)
     else:
@@ -104,15 +104,15 @@ def local_response_norm(x):
     return tf.nn.lrn(x, depth_radius=5, bias=2, alpha=1e-4, beta=0.75)
 
 
-def batch_norm(x, n_out, phase_train, scope='bn', decay=0.1, eps=1e-5):
+def batch_norm(x, n_out, phase_train, scope='bn', decay=0.9, eps=1e-5):
     """
     Code taken from http://stackoverflow.com/a/34634291/2267819
     """
     with tf.variable_scope(scope):
-        beta = tf.Variable(tf.constant(0.0, shape=[n_out]),
-                           name='beta', trainable=True)
-        gamma = tf.Variable(tf.constant(1.0, shape=[n_out]),
-                            name='gamma', trainable=True)
+        beta = tf.get_variable(name='beta', shape=[n_out], initializer=tf.constant_initializer(0.0)
+                               , trainable=True)
+        gamma = tf.get_variable(name='gamma', shape=[n_out], initializer=tf.random_normal_initializer(1.0, 0.02),
+                                trainable=True)
         batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
         ema = tf.train.ExponentialMovingAverage(decay=decay)
 
@@ -216,4 +216,3 @@ def add_activation_summary(var):
 def add_gradient_summary(grad, var):
     if grad is not None:
         tf.histogram_summary(var.op.name + "/gradient", grad)
-
