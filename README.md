@@ -27,7 +27,7 @@ A repo of everything deep and neurally related. Implementations and ideas are la
  
 ---
 ##Results
- - Generative Adversarial Networks - Implementation of DCGAN on Flowers dataset and celebA dataset. Used [carpedm20](https://github.com/carpedm20/DCGAN-tensorflow) and [Newmu](https://github.com/Newmu/dcgan_code)'s DCGAN code for reference. The sample outputs below are the generated images - Results in increading order of epochs from left to right.
+ - Generative Adversarial Networks - Tensorflow implementation of DCGAN on Flowers dataset and celebA dataset. Used [carpedm20](https://github.com/carpedm20/DCGAN-tensorflow) and [Newmu](https://github.com/Newmu/dcgan_code)'s DCGAN code for reference. The sample outputs below are the generated images - Results in increading order of epochs from left to right.
  
 	CelebA
 
