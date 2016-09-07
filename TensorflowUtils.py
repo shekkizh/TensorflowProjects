@@ -2,6 +2,7 @@ __author__ = 'Charlie'
 # Utils used with tensorflow implemetation
 import tensorflow as tf
 import numpy as np
+import scipy.misc as misc
 import os, sys
 from six.moves import urllib
 import tarfile
@@ -29,6 +30,21 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=
             with zipfile.ZipFile(filepath) as zf:
                 zip_dir = zf.namelist()[0]
                 zf.extractall(dir_path)
+
+
+def save_image(image, image_size, save_dir, name=""):
+    """
+    Save image by unprocessing assuming mean 127.5
+    :param image:
+    :param save_dir:
+    :param name:
+    :return:
+    """
+    image += 1
+    image *= 127.5
+    image = np.clip(image, 0, 255).astype(np.uint8)
+    image = np.reshape(image, (image_size, image_size, -1))
+    misc.imsave(os.path.join(save_dir, name + "pred_image.tif"), image)
 
 
 def xavier_init(fan_in, fan_out, constant=1):

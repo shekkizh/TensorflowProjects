@@ -179,7 +179,7 @@ def main(argv=None):
     images = read_input_queue(filename_queue)
 
     train_phase = tf.placeholder(tf.bool)
-    z_vec = tf.placeholder(tf.float32, [FLAGS.batch_size, FLAGS.z_dim], name="z")
+    z_vec = tf.placeholder(tf.float32, [None, FLAGS.z_dim], name="z")
 
     print("Setting up network model...")
     tf.histogram_summary("z", z_vec)
@@ -219,6 +219,18 @@ def main(argv=None):
     for v in train_variables:
         utils.add_to_regularization_and_summary(var=v)
 
+    def visualize():
+        count = 10
+        # z_feed = 10.0 * np.random.randn(count, FLAGS.z_dim)
+        z_feed = np.tile(np.random.uniform(-1.0, 1.0, size=(1, FLAGS.z_dim)).astype(np.float32), (count, 1))
+        z_feed[:, 75] = sorted(10.0 * np.random.randn(count))
+        image = sess.run(gen_images, feed_dict={z_vec: z_feed, train_phase: False})
+
+        for iii in xrange(count):
+            print (image.shape)
+            utils.save_image(image[iii, :, :, :], IMAGE_SIZE, FLAGS.logs_dir, name=str(iii))
+            print("Saving image" + str(iii))
+
     sess = tf.Session()
     summary_op = tf.merge_all_summaries()
     saver = tf.train.Saver()
@@ -229,6 +241,9 @@ def main(argv=None):
     if ckpt and ckpt.model_checkpoint_path:
         saver.restore(sess, ckpt.model_checkpoint_path)
         print("Model restored...")
+        visualize()
+        return
+
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(sess, coord)
     try:
