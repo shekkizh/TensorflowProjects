@@ -220,14 +220,14 @@ def main(argv=None):
         utils.add_to_regularization_and_summary(var=v)
 
     def visualize():
-        count = 10
-        # z_feed = 10.0 * np.random.randn(count, FLAGS.z_dim)
-        z_feed = np.tile(np.random.uniform(-1.0, 1.0, size=(1, FLAGS.z_dim)).astype(np.float32), (count, 1))
-        z_feed[:, 75] = sorted(10.0 * np.random.randn(count))
+        count = 20
+        z_feed = np.random.uniform(-1.0, 1.0, size=(count, FLAGS.z_dim)).astype(np.float32)
+        # z_feed = np.tile(np.random.uniform(-1.0, 1.0, size=(1, FLAGS.z_dim)).astype(np.float32), (count, 1))
+        # z_feed[:, 25] = sorted(10.0 * np.random.randn(count))
         image = sess.run(gen_images, feed_dict={z_vec: z_feed, train_phase: False})
 
         for iii in xrange(count):
-            print (image.shape)
+            print(image.shape)
             utils.save_image(image[iii, :, :, :], IMAGE_SIZE, FLAGS.logs_dir, name=str(iii))
             print("Saving image" + str(iii))
 
