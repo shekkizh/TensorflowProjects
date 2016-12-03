@@ -23,7 +23,7 @@ def maybe_download_and_extract(dir_path, url_name, is_tarfile=False, is_zipfile=
         filepath, _ = urllib.request.urlretrieve(url_name, filepath, reporthook=_progress)
         print()
         statinfo = os.stat(filepath)
-        print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
+        print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
         if is_tarfile:
             tarfile.open(filepath, 'r:gz').extractall(dir_path)
         elif is_zipfile:
@@ -44,7 +44,7 @@ def save_image(image, image_size, save_dir, name=""):
     image *= 127.5
     image = np.clip(image, 0, 255).astype(np.uint8)
     image = np.reshape(image, (image_size, image_size, -1))
-    misc.imsave(os.path.join(save_dir, name + "pred_image.tif"), image)
+    misc.imsave(os.path.join(save_dir, name + "pred_image.png"), image)
 
 
 def xavier_init(fan_in, fan_out, constant=1):

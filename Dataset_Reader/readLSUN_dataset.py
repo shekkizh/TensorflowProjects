@@ -25,7 +25,8 @@ def read_LSUN(data_dir, category, tag="latest"):
         download(data_dir, category, 'train', tag)
         download(data_dir, category, 'val', tag)
         # download(data_dir, '', 'test', tag)
-
+    train_fns = []
+    validation_fns = []
     for _, _, files in os.walk(os.path.join(data_dir, 'train')):
         train_fns = [x for x in files]
     for _, _, files in os.walk(os.path.join(data_dir, 'val')):

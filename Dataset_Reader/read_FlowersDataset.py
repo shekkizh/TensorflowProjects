@@ -38,6 +38,9 @@ def read_dataset(data_dir):
         validation_images = result['validation']
 
         del result
+
+    print ("Training: %d, Validation: %d, Test: %d" % (
+        len(training_images), len(validation_images), len(testing_images)))
     return training_images, testing_images, validation_images
 
 
