@@ -26,3 +26,5 @@ DBG_Encoder
 Data_zoo
 logs/CelebA_GAN_logs logs/CelebA_GAN_logs_1/* logs/DBG_Encoder_logs/* logs/Flowers_GAN_logs_1/* logs/LFW_GAN_logs/* logs/MNIST_Activation/* logs/mnist_logs/* logs/MNIST_logs/* logs/MNIST_Pruning_logs/* logs/MNIST_VAE_logs
 logs/CelebA_GAN_logs logs/*
+.idea
+.ipynb_checkpoints
