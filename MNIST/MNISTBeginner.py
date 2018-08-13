@@ -1,5 +1,5 @@
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets("MNIST_data/", one_hot = True)
+from tensorflow.contrib.learn.python.learn.datasets import mnist as mnist_data
+mnist = mnist_data.read_data_sets("MNIST_data/", one_hot = True)
 
 import tensorflow as tf
 
