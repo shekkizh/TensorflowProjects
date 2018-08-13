@@ -28,3 +28,4 @@ logs/CelebA_GAN_logs logs/CelebA_GAN_logs_1/* logs/DBG_Encoder_logs/* logs/Flowe
 logs/CelebA_GAN_logs logs/*
 .idea
 .ipynb_checkpoints
+*DS_Store
